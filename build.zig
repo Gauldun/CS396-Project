@@ -13,6 +13,10 @@ pub fn build(b: *std.Build) void {
         }),
     });
 
+    const systemsLib = b.createModule (.{
+        .root_source_file = b.path("src/zig/systems.zig"),
+    });
+
     exe.addCSourceFiles(.{
         .files = &.{
             "src/cpp/entities.cpp",
@@ -27,6 +31,8 @@ pub fn build(b: *std.Build) void {
     exe.addIncludePath(b.path("src/cpp_interop/"));
 
     exe.linkLibCpp();
+
+    exe.root_module.addImport("systems", systemsLib);
 
     b.installArtifact(exe);
 

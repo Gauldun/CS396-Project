@@ -1,9 +1,11 @@
 const std = @import("std");
-const printLn = std.debug.print;
+const sys = @import("systems.zig");
+const printErr = std.debug.print;
+const stdout = std.fs.File.stdout();
 const CPP = @cImport({
     @cInclude("c_wrapper.hpp");
 });
 
-pub fn main() void {
-    printLn("Compiles Great!\n", .{});
+pub fn main() !void {
+    try stdout.writeAll("Hello, world!\n");
 }
