@@ -30,8 +30,7 @@ pub fn build(b: *std.Build) void {
     });
 
     exe.linkLibCpp();
-    exe.linkLibC();
-
+    exe.linkSystemLibrary("c++");
     exe.addIncludePath(b.path("src/cpp/"));
     exe.addIncludePath(b.path("src/cpp_interop/"));
 

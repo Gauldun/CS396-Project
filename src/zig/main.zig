@@ -1,13 +1,21 @@
+// Library const imports
 const std = @import("std");
 const sys = @import("systems.zig");
-const printErr = std.debug.print;
-const stdout = std.fs.File.stdout();
 const CPP = @cImport({
-    @cInclude("c_wrapper.h");
+    @cInclude("c_wrapper.hpp");
 });
 
+// Player Character CPP function const calls
 const createPlayerChar = CPP.PlayerEntityCreate;
 const destroyPlayerChar = CPP.PlayerEntityDestroy;
+
+// Standard Library const function calls
+const printErr = std.debug.print;
+const stdout = std.fs.File.stdout();
+const printBuffer = std.fmt.bufPrint;
+
+// Global buffer for printing game logic 
+var BUFF: [4096]u8 = undefined; // Size is 4 Kilobytes 
 
 pub fn main() !void {
     try sys.welcomeMessage();
