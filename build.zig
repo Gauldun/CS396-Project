@@ -5,9 +5,9 @@ pub fn build(b: *std.Build) void {
     const optimize = b.standardOptimizeOption(.{});
 
     const exe = b.addExecutable(.{
-        .name = "game", // Name of your final executable
+        .name = "game",
         .root_module = b.createModule(.{
-            .root_source_file = b.path("src/zig/main.zig"), // Your main Zig entry point
+            .root_source_file = b.path("src/zig/main.zig"),
             .target = target,
             .optimize = optimize,
         }),
@@ -24,13 +24,17 @@ pub fn build(b: *std.Build) void {
         },
         .flags = &.{
             "-std=c++20",
+            "-Wall",
+            "-Wextra",
         },
     });
+
+    exe.linkLibCpp();
+    exe.linkLibC();
 
     exe.addIncludePath(b.path("src/cpp/"));
     exe.addIncludePath(b.path("src/cpp_interop/"));
 
-    exe.linkLibCpp();
 
     exe.root_module.addImport("systems", systemsLib);
 
