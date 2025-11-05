@@ -1,6 +1,7 @@
 #include "c_wrapper.hpp"
 #include "entities.hpp"
-#include <cstdint>
+#include <stdint.h>
+#include <stdbool.h>
 
 #define TO_PLAYER_ENTITY(handle) reinterpret_cast<PlayerEntity*>(handle)
 #define TO_ENEMY_ENTITY(handle) reinterpret_cast<EnemyEntity*>(handle)

@@ -5,8 +5,8 @@ const CPP = @cImport({
     @cInclude("c_wrapper.hpp");
 });
 
-pub fn welcomeMessage() void {
-    stdout.writeAll("Welcome to [GAME_NAME]!\n ");
+pub fn welcomeMessage() !void {
+    try stdout.writeAll("Welcome to [GAME_NAME]!\n ");
     // Basic game play explanation:
     // Keybindings explanation:
     // General goal explanation:

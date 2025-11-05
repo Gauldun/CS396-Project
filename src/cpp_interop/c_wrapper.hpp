@@ -4,7 +4,8 @@
 extern "C" 
 {
     #endif
-    #include <cstdint>
+    #include <stdint.h>
+    #include <stdbool.h>
 
     // Opaque type: The PlayerEntity pointer, hidden from C/Zig
     typedef void PlayerEntityHandle;
