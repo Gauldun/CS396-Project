@@ -56,10 +56,14 @@ pub fn main() !void {
     // destroyEnemyChar(enemyGrunt);
     //
     //General Game loop
-    // while (true) {
-    //     // Prompt User for choice of attack
-    //     // Prompt requires choice of player character to attack with, which enemy to attack (currently there are no abilities [Simple Point & Click])
-    //     stdout.WriteAll("Choose which player character to attack with (Rear[3], Middle[2], Front[1]\n");
-    // }
+    while (true) {
+        // Prompt User for choice of attack
+        // Prompt requires choice of player character to attack with, which enemy to attack (currently there are no abilities [Simple Point & Click])
+        try stdout.writeAll("Choose which player character to attack with (Rear[3], Middle[2], Front[1]\n");
+        const action1 = try stdin();
+        try stdout.writeAll(action1);
+        const action2 = try stdin();
+        try stdout.writeAll(action2);
+    }
 }
 
