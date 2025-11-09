@@ -21,6 +21,7 @@ pub const stdin = &stdinReader.interface;
 const setPlayerHealth = CPP.PlayerEntitySetHealth;
 const setEnemyHealth = CPP.EnemyEntitySetHealth;
 
+// Inital Message to be called in main function
 pub fn welcomeMessage() !void {
     // Basic game play explanation:
     // Keybindings explanation:

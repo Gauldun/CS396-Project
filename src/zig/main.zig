@@ -18,11 +18,14 @@ pub fn main() !void {
     const stdin = sys.stdin;
     const stdout = sys.stdout;
 
-    try stdout.print("Enter your which character you'd like to have act first: ", .{});
+    try stdout.print("Enter which character you'd like to have act first: ", .{});
     try stdout.flush();
-    const c = try stdin.takeByte();
-    try stdout.print("\nAction: {c}", .{c});
+    const x = try stdin.takeByte();
+
+    try stdout.print("\nAction: {c}", .{x});
     try stdout.flush();
+
+    _ = try stdin.takeByte(); // Consume '\n'
 
     try stdout.print("\nEnter what ability to use: ", .{});
     try stdout.flush();
@@ -30,6 +33,8 @@ pub fn main() !void {
 
     try stdout.print("\nAbility: {c}", .{y});
     try stdout.flush();
+
+    _ = try stdin.takeByte(); // Consume '\n'
 
     // // Tank Player Party Character w/ Base Stats; 100 Health, 15 Damage, 1 Range, 3 Speed
     // const tankChar = createPlayerChar(100, 15, 1, 3);
