@@ -4,45 +4,42 @@ const CPP = @cImport({
     @cInclude("c_wrapper.hpp");
 });
 
-// Standard lib function const calls
-const printErr = std.debug.print;
-const stdout = std.fs.File.stdout();
+// Print for debugging
+pub const stderr = std.debug.print;
+
+// Stdout variables
+var stdoutBuffer: [1024]u8 = undefined;
+var stdoutWriter = std.fs.File.stdout().writer(&stdoutBuffer);
+pub const stdout = &stdoutWriter.interface;
+
+//Stdin variables
+var stdinBuffer: [1024]u8 = undefined;
+var stdinReader = std.fs.File.stdin().reader(&stdinBuffer);
+pub const stdin = &stdinReader.interface;
 
 // CPP Const function calls
 const setPlayerHealth = CPP.PlayerEntitySetHealth;
 const setEnemyHealth = CPP.EnemyEntitySetHealth;
 
 pub fn welcomeMessage() !void {
-    try stdout.writeAll("Welcome to [GAME_NAME]!\n ");
     // Basic game play explanation:
     // Keybindings explanation:
     // General goal explanation:
 }
 
-pub fn readInput() ![]const u8 {
-    // 1. Get the stdout writer and stdin reader
-    var stdin_buffer: [63]u8 = undefined;
-    var stdin_reader = std.fs.File.stdin().reader(&stdin_buffer);
-    const stdin = &stdin_reader.interface;
-
-    const line = try stdin.takeDelimiterExclusive('\n');
-
-    return line;
-}
 // Functional: Returns new health value after character takes damage
 pub fn calcDamage(damage: i32, health: i32) i32 {
     const result = if ((health - damage) <= 0) 0 else health - damage;
     return result;
-} 
+}
 
 // Functional: Returns new modified value after character acquires some modifier (Could be an item or game effect)
 pub fn calcModifiedVal(modifier: i32, currVal: i32) i32 {
     if (currVal == 0) {
         return currVal;
-    }
-    else {
-    const result = if ((currVal * modifier) <= 1) 1 else currVal * modifier;
-    return result;
+    } else {
+        const result = if ((currVal * modifier) <= 1) 1 else currVal * modifier;
+        return result;
     }
 }
 
