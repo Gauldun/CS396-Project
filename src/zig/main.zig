@@ -18,27 +18,28 @@ pub fn main() !void {
     const stdin = sys.stdin;
     const stdout = sys.stdout;
 
-    // // Tank Player Party Character w/ Base Stats; 100 Health, 15 Damage, 1 Range, hasTurn
-    // const tankChar = createPlayerChar(100, 15, 1, true);
-    // // Priest Player Party Character w/ Base Stats; 50 Health, 0 Damage, 3 Range, hasTurn
-    // const priestChar = createPlayerChar(50, 0, 3, true);
-    // // Archer Player Party Character w/ Base Stats; 75 Health, 30 Damge, 3 Range, hasTurn
-    // const archerChar = createPlayerChar(75, 30, 3, true);
-    //
-    // // Call Destructors
-    // destroyPlayerChar(tankChar);
-    // destroyPlayerChar(priestChar);
-    // destroyPlayerChar(archerChar);
-    //
+    // Tank Player Party Character w/ Base Stats; 100 Health, 15 Damage, 1 Range, hasTurn
+    const tankChar = createPlayerChar(100, 15, 1, true);
+    // Priest Player Party Character w/ Base Stats; 50 Health, 0 Damage, 3 Range, hasTurn
+    const priestChar = createPlayerChar(50, 0, 3, true);
+    // Archer Player Party Character w/ Base Stats; 75 Health, 30 Damge, 3 Range, hasTurn
+    const archerChar = createPlayerChar(75, 30, 3, true);
+
     // Prompt User for choice of attack
     // Prompt requires choice of player character to attack with, which enemy to attack (currently there are no abilities [Simple Point & Click])
 
     while (true) {
-        try stdout.print("Enter which character you'd like to have act: ", .{});
-        try stdout.flush();
+        const charChoice = try sys.getCharInput("Enter which character you'd like to have act [1. Tank] [2. Archer] [3. Priest]: ");
 
-        const charChoiceInput = try stdin.takeByte();
-        _ = try stdin.takeByte(); // Consumes '\n' character
+        switch (charChoice) {
+            '1' => sys.handleTankInput(),
+            '2' => sys.handleArcherInput(),
+            '3' => sys.handlePriestInput(),
+            else => {
+                try stdout.print("Invalid Input. Please try again!");
+                try stdout.flush();
+            },
+        }
 
         if (charChoiceInput == '3') {
             // Ability 1: Single Target hit, average Damage
@@ -134,4 +135,8 @@ pub fn main() !void {
             }
         }
     }
+    // Call Destructors
+    destroyPlayerChar(tankChar);
+    destroyPlayerChar(priestChar);
+    destroyPlayerChar(archerChar);
 }

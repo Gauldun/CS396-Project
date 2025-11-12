@@ -28,6 +28,35 @@ pub fn welcomeMessage() !void {
     // General goal explanation:
 }
 
+pub fn getCharInput(prompt: []const u8) !u8 {
+    try stdout.print("{s}", .{prompt});
+    try stdout.flush();
+
+    const choice = try stdin.takeByte();
+    _ = try stdin.takeByte(); // Consumes '\n'
+
+    return choice;
+}
+
+pub fn handleTankInput() !void {
+    const abilityChoice = try getCharInput(
+    "\nAbility 1: Single Enemy Hit" ++
+    "\nAbility 2: Taunt Enemy Team" ++
+    "\nAbility 3: Increase Resistance" ++
+    "\nEnter which ability you'd like to have the tank use: ");
+
+    switch (abilityChoice) {
+        '1' => 
+    } 
+}
+
+pub fn handleArcherInput() !void {
+
+}
+
+pub fn handlePriestInput() !void {
+
+}
 // Functional: Returns new health value after character takes damage
 pub fn calcDamage(damage: i32, health: i32) i32 {
     const result = if ((health - damage) <= 0) 0 else health - damage;
@@ -45,13 +74,13 @@ pub fn calcModifiedVal(modifier: i32, currVal: i32) i32 {
 }
 
 // Imperative: Applies resulting damage onto player character
-pub fn applyPlayerDamage(player: *const cpp.PlayerEntityHandle, damage: i32, health: i32) void {
+pub fn applyPlayerDamage(player: *const cpp.PlayerEntityHandle, damage: i32, health: i32) !void {
     const result = calcDamage(damage, health);
     setPlayerHealth(@constCast(player), result);
 }
 
 // Imperative: Applies resulting damage onto player character
-pub fn applyEnemyDamage(enemy: *const cpp.EnemyEntityHandle, damage: i32, health: i32) void {
+pub fn applyEnemyDamage(enemy: *const cpp.EnemyEntityHandle, damage: i32, health: i32) !void {
     const result = calcDamage(damage, health);
     setEnemyHealth(@constCast(enemy), result);
 }
