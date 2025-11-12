@@ -1,6 +1,6 @@
 //Library const imports
 const std = @import("std");
-const CPP = @cImport({
+const cpp = @cImport({
     @cInclude("c_wrapper.hpp");
 });
 
@@ -17,9 +17,9 @@ var stdinBuffer: [1024]u8 = undefined;
 var stdinReader = std.fs.File.stdin().reader(&stdinBuffer);
 pub const stdin = &stdinReader.interface;
 
-// CPP Const function calls
-const setPlayerHealth = CPP.PlayerEntitySetHealth;
-const setEnemyHealth = CPP.EnemyEntitySetHealth;
+// cpp Const function calls
+const setPlayerHealth = cpp.PlayerEntitySetHealth;
+const setEnemyHealth = cpp.EnemyEntitySetHealth;
 
 // Inital Message to be called in main function
 pub fn welcomeMessage() !void {
@@ -45,13 +45,13 @@ pub fn calcModifiedVal(modifier: i32, currVal: i32) i32 {
 }
 
 // Imperative: Applies resulting damage onto player character
-pub fn applyPlayerDamage(player: *const CPP.PlayerEntityHandle, damage: i32, health: i32) void {
+pub fn applyPlayerDamage(player: *const cpp.PlayerEntityHandle, damage: i32, health: i32) void {
     const result = calcDamage(damage, health);
     setPlayerHealth(@constCast(player), result);
 }
 
 // Imperative: Applies resulting damage onto player character
-pub fn applyEnemyDamage(enemy: *const CPP.EnemyEntityHandle, damage: i32, health: i32) void {
+pub fn applyEnemyDamage(enemy: *const cpp.EnemyEntityHandle, damage: i32, health: i32) void {
     const result = calcDamage(damage, health);
     setEnemyHealth(@constCast(enemy), result);
 }
