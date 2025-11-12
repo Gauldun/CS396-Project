@@ -51,6 +51,19 @@ pub fn main() !void {
             if (abilityChoice == '1') {
                 try stdout.print("Enter Which Enemy you'd like to attack", .{});
                 try stdout.flush();
+
+                const enemyChoice = try stdin.takeByte();
+                _ = try stdin.takeByte();
+                if (enemyChoice == '1') {
+                    try stdout.print("Enemy {c} was hit!", .{enemyChoice});
+                    try stdout.flush();
+                } else if (enemyChoice == '2') {
+                    try stdout.print("Enemy {c} was hit!", .{enemyChoice});
+                    try stdout.flush();
+                } else if (enemyChoice == '3') {
+                    try stdout.print("Enemy {c} was hit!", .{enemyChoice});
+                    try stdout.flush();
+                }
             } else if (abilityChoice == '2') {
                 try stdout.print("Enemy Team takes damage!", .{});
                 try stdout.flush();
@@ -68,6 +81,20 @@ pub fn main() !void {
             if (abilityChoice == '1') {
                 try stdout.print("Enter which team member you'd like to heal: ", .{});
                 try stdout.flush();
+
+                const allyChoice = try stdin.takeByte();
+                _ = try stdin.takeByte();
+
+                if (allyChoice == '1') {
+                    try stdout.print("Team member {c} was healed!", .{allyChoice});
+                    try stdout.flush();
+                } else if (allyChoice == '2') {
+                    try stdout.print("Team member {c} was healed!", .{allyChoice});
+                    try stdout.flush();
+                } else if (allyChoice == '3') {
+                    try stdout.print("Team member {c} was healed!", .{allyChoice});
+                    try stdout.flush();
+                }
             } else if (abilityChoice == '2') {
                 try stdout.print("The teams members have gained slight resistance and health regen!", .{});
                 try stdout.flush();
@@ -84,8 +111,22 @@ pub fn main() !void {
             if (abilityChoice == '1') {
                 try stdout.print("Enter which enemy you'd like to attack: ", .{});
                 try stdout.flush();
+
+                const enemyChoice = try stdin.takeByte();
+                _ = try stdin.takeByte();
+
+                if (enemyChoice == '1') {
+                    try stdout.print("Enemy {c} was hit!", .{enemyChoice});
+                    try stdout.flush();
+                } else if (enemyChoice == '2') {
+                    try stdout.print("Enemy {c} was hit!", .{enemyChoice});
+                    try stdout.flush();
+                } else if (enemyChoice == '3') {
+                    try stdout.print("Enemy {c} was hit!", .{enemyChoice});
+                    try stdout.flush();
+                }
             } else if (abilityChoice == '2') {
-                try stdout.print("The enemies are forced to attack you!", .{});
+                try stdout.print("The enemies have taken notice of your presence!", .{});
                 try stdout.flush();
             } else if (abilityChoice == '3') {
                 try stdout.print("Your defense has increased!", .{});
