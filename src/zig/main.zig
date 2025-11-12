@@ -45,40 +45,51 @@ pub fn main() !void {
             // Ability 2: Entire enemy team it hit, less than average Damage
             // Ability 3: Cosumes a turn, next turn with archer, damage is doubled
             try stdout.print("Display Archer Character Abilites: Make it 3 Abilites [Damage/Target Debuff]", .{});
+            try stdout.flush();
             const abilityChoice = try stdin.takeByte();
             _ = try stdin.takeByte(); // Consumes '\n' charcter
             if (abilityChoice == '1') {
                 try stdout.print("Enter Which Enemy you'd like to attack", .{});
+                try stdout.flush();
             } else if (abilityChoice == '2') {
                 try stdout.print("Enemy Team takes damage!", .{});
+                try stdout.flush();
             } else if (abilityChoice == '3') {
                 try stdout.print("Next time Archer is used, damage is double", .{});
+                try stdout.flush();
             }
         } else if (charChoiceInput == '2') {
             // Ability 1: Single Target Heal Greatly
             // Ability 3:  Team Buff (Could be Regen or Resistance or both), priest takes 2 turns before he can go again
             try stdout.print("Display Priest Character Abilties: Make it 2 Abilites [Healing/Buff]", .{});
+            try stdout.flush();
             const abilityChoice = try stdin.takeByte();
             _ = try stdin.takeByte(); // Consumes '\n' character
             if (abilityChoice == '1') {
                 try stdout.print("Enter which team member you'd like to heal: ", .{});
+                try stdout.flush();
             } else if (abilityChoice == '2') {
-                try stdout.print("The teams members have gained slight resistance and health regen!");
+                try stdout.print("The teams members have gained slight resistance and health regen!", .{});
+                try stdout.flush();
             }
         } else if (charChoiceInput == '1') {
             // Ability 1: Stuns and Damages a single target, average amount
             // Ability 2: Taunts to force enemies to attack for the next three turns, tank takes 2 turns before he can go again
             // Ability 3: Bolsters Physical Resistance for the next two turns
             try stdout.print("Display Tank Character Abilites: Make it 3 Abilities [Damage/Taunt/Tank", .{});
+            try stdout.flush();
             const abilityChoice = try stdin.takeByte();
             _ = try stdin.takeByte(); // Consumes '\n' character
 
             if (abilityChoice == '1') {
-                try stdout.print("Enter which enemy you'd like to attack: ");
+                try stdout.print("Enter which enemy you'd like to attack: ", .{});
+                try stdout.flush();
             } else if (abilityChoice == '2') {
-                try stdout.print("The enemies are forced to attack you!");
+                try stdout.print("The enemies are forced to attack you!", .{});
+                try stdout.flush();
             } else if (abilityChoice == '3') {
-                try stdout.print("Your defense has increased!");
+                try stdout.print("Your defense has increased!", .{});
+                try stdout.flush();
             }
         }
     }
