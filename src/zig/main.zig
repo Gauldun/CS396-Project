@@ -15,7 +15,6 @@ const destroyEnemyChar = cpp.EnemyEntityDestroy;
 
 pub fn main() !void {
     // Comptime constants for print function calls
-    const stdin = sys.stdin;
     const stdout = sys.stdout;
 
     // Tank Player Party Character w/ Base Stats; 100 Health, 15 Damage, 1 Range, hasTurn
@@ -25,115 +24,18 @@ pub fn main() !void {
     // Archer Player Party Character w/ Base Stats; 75 Health, 30 Damge, 3 Range, hasTurn
     const archerChar = createPlayerChar(75, 30, 3, true);
 
-    // Prompt User for choice of attack
-    // Prompt requires choice of player character to attack with, which enemy to attack (currently there are no abilities [Simple Point & Click])
-
     while (true) {
-        const charChoice = try sys.getCharInput("Enter which character you'd like to have act [1. Tank] [2. Archer] [3. Priest]: ");
+        const charChoice = try sys.getCharInput("\nEnter which character you'd like to have act [1. Tank] [2. Archer] [3. Priest]: ");
 
-        switch (charChoice) {
+        try switch (charChoice) {
             '1' => sys.handleTankInput(),
             '2' => sys.handleArcherInput(),
             '3' => sys.handlePriestInput(),
             else => {
-                try stdout.print("Invalid Input. Please try again!");
+                try stdout.print("Invalid Input. Please try again!", .{});
                 try stdout.flush();
             },
-        }
-
-        if (charChoiceInput == '3') {
-            // Ability 1: Single Target hit, average Damage
-            // Ability 2: Entire enemy team it hit, less than average Damage
-            // Ability 3: Cosumes a turn, next turn with archer, damage is doubled
-            try stdout.print("Display Archer Character Abilites: Make it 3 Abilites [Damage/Target Debuff]", .{});
-            try stdout.flush();
-            const abilityChoice = try stdin.takeByte();
-            _ = try stdin.takeByte(); // Consumes '\n' charcter
-            if (abilityChoice == '1') {
-                try stdout.print("Enter Which Enemy you'd like to attack", .{});
-                try stdout.flush();
-
-                const enemyChoice = try stdin.takeByte();
-                _ = try stdin.takeByte();
-                if (enemyChoice == '1') {
-                    try stdout.print("Enemy {c} was hit!", .{enemyChoice});
-                    try stdout.flush();
-                } else if (enemyChoice == '2') {
-                    try stdout.print("Enemy {c} was hit!", .{enemyChoice});
-                    try stdout.flush();
-                } else if (enemyChoice == '3') {
-                    try stdout.print("Enemy {c} was hit!", .{enemyChoice});
-                    try stdout.flush();
-                }
-            } else if (abilityChoice == '2') {
-                try stdout.print("Enemy Team takes damage!", .{});
-                try stdout.flush();
-            } else if (abilityChoice == '3') {
-                try stdout.print("Next time Archer is used, damage is double", .{});
-                try stdout.flush();
-            }
-        } else if (charChoiceInput == '2') {
-            // Ability 1: Single Target Heal Greatly
-            // Ability 3:  Team Buff (Could be Regen or Resistance or both), priest takes 2 turns before he can go again
-            try stdout.print("Display Priest Character Abilties: Make it 2 Abilites [Healing/Buff]", .{});
-            try stdout.flush();
-            const abilityChoice = try stdin.takeByte();
-            _ = try stdin.takeByte(); // Consumes '\n' character
-            if (abilityChoice == '1') {
-                try stdout.print("Enter which team member you'd like to heal: ", .{});
-                try stdout.flush();
-
-                const allyChoice = try stdin.takeByte();
-                _ = try stdin.takeByte();
-
-                if (allyChoice == '1') {
-                    try stdout.print("Team member {c} was healed!", .{allyChoice});
-                    try stdout.flush();
-                } else if (allyChoice == '2') {
-                    try stdout.print("Team member {c} was healed!", .{allyChoice});
-                    try stdout.flush();
-                } else if (allyChoice == '3') {
-                    try stdout.print("Team member {c} was healed!", .{allyChoice});
-                    try stdout.flush();
-                }
-            } else if (abilityChoice == '2') {
-                try stdout.print("The teams members have gained slight resistance and health regen!", .{});
-                try stdout.flush();
-            }
-        } else if (charChoiceInput == '1') {
-            // Ability 1: Stuns and Damages a single target, average amount
-            // Ability 2: Taunts to force enemies to attack for the next three turns, tank takes 2 turns before he can go again
-            // Ability 3: Bolsters Physical Resistance for the next two turns
-            try stdout.print("Display Tank Character Abilites: Make it 3 Abilities [Damage/Taunt/Tank", .{});
-            try stdout.flush();
-            const abilityChoice = try stdin.takeByte();
-            _ = try stdin.takeByte(); // Consumes '\n' character
-
-            if (abilityChoice == '1') {
-                try stdout.print("Enter which enemy you'd like to attack: ", .{});
-                try stdout.flush();
-
-                const enemyChoice = try stdin.takeByte();
-                _ = try stdin.takeByte();
-
-                if (enemyChoice == '1') {
-                    try stdout.print("Enemy {c} was hit!", .{enemyChoice});
-                    try stdout.flush();
-                } else if (enemyChoice == '2') {
-                    try stdout.print("Enemy {c} was hit!", .{enemyChoice});
-                    try stdout.flush();
-                } else if (enemyChoice == '3') {
-                    try stdout.print("Enemy {c} was hit!", .{enemyChoice});
-                    try stdout.flush();
-                }
-            } else if (abilityChoice == '2') {
-                try stdout.print("The enemies have taken notice of your presence!", .{});
-                try stdout.flush();
-            } else if (abilityChoice == '3') {
-                try stdout.print("Your defense has increased!", .{});
-                try stdout.flush();
-            }
-        }
+        };
     }
     // Call Destructors
     destroyPlayerChar(tankChar);
