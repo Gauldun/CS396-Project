@@ -8,18 +8,16 @@
 #define TO_ITEM(handle) reinterpret_cast<Item *>(handle)
 
 // Constructors
-PlayerEntityHandle *PlayerEntityCreate(int32_t hVal, int32_t dVal, int32_t rVal,
-                                       bool tVal) {
+PlayerEntityHandle *PlayerEntityCreate(int32_t hVal, int32_t dVal, bool tVal) {
   // Allocate the C++ object on the heap and cast its pointer to the opaque
   // handle
   return reinterpret_cast<PlayerEntityHandle *>(
-      new PlayerEntity(hVal, dVal, rVal, tVal));
+      new PlayerEntity(hVal, dVal, tVal));
 }
 
-EnemyEntityHandle *EnemyEntityCreate(int32_t hVal, int32_t dVal, int32_t rVal,
-                                     bool tVal) {
+EnemyEntityHandle *EnemyEntityCreate(int32_t hVal, int32_t dVal, bool tVal) {
   return reinterpret_cast<EnemyEntityHandle *>(
-      new EnemyEntity(hVal, dVal, rVal, tVal));
+      new EnemyEntity(hVal, dVal, tVal));
 }
 
 ItemHandle *ItemHandleCreate(bool dmgBool, bool suppBool, bool effectBool,
@@ -60,12 +58,6 @@ int32_t PlayerEntityGetDamage(PlayerEntityHandle *handle) {
   return TO_PLAYER_ENTITY(handle)->getDamage();
 }
 
-int32_t PlayerEntityGetRange(PlayerEntityHandle *handle) {
-  if (!handle)
-    return 0;
-  return TO_PLAYER_ENTITY(handle)->getRange();
-}
-
 int32_t PlayerEntityGetTurn(PlayerEntityHandle *handle) {
   if (!handle)
     return 0;
@@ -83,12 +75,6 @@ int32_t EnemyEntityGetDamage(EnemyEntityHandle *handle) {
   if (!handle)
     return 0;
   return TO_ENEMY_ENTITY(handle)->getDamage();
-}
-
-int32_t EnemyEntityGetRange(EnemyEntityHandle *handle) {
-  if (!handle)
-    return 0;
-  return TO_ENEMY_ENTITY(handle)->getRange();
 }
 
 int32_t EnemyEntityGetTurn(EnemyEntityHandle *handle) {
@@ -117,12 +103,6 @@ void PlayerEntitySetDamage(PlayerEntityHandle *handle, int32_t newDamage) {
   TO_PLAYER_ENTITY(handle)->setDamage(newDamage);
 }
 
-void PlayerEntitySetRange(PlayerEntityHandle *handle, int32_t newRange) {
-  if (!handle)
-    return;
-  TO_PLAYER_ENTITY(handle)->setRange(newRange);
-}
-
 void PlayerEntitySetTurn(PlayerEntityHandle *handle, bool newTurn) {
   if (!handle)
     return;
@@ -140,12 +120,6 @@ void EnemyEntitySetDamage(EnemyEntityHandle *handle, int32_t newDamage) {
   if (!handle)
     return;
   TO_ENEMY_ENTITY(handle)->setDamage(newDamage);
-}
-
-void EnemyEntitySetRange(EnemyEntityHandle *handle, int32_t newRange) {
-  if (!handle)
-    return;
-  TO_ENEMY_ENTITY(handle)->setRange(newRange);
 }
 
 void EnemyEntitySetTurn(EnemyEntityHandle *handle, bool newTurn) {

@@ -21,13 +21,6 @@ pub const stdin = &stdinReader.interface;
 const setPlayerHealth = cpp.PlayerEntitySetHealth;
 const setEnemyHealth = cpp.EnemyEntitySetHealth;
 
-// Inital Message to be called in main function
-pub fn welcomeMessage() !void {
-    // Basic game play explanation:
-    // Keybindings explanation:
-    // General goal explanation:
-}
-
 pub fn getCharInput(prompt: []const u8) !u8 {
     try stdout.print("{s}", .{prompt});
     try stdout.flush();
@@ -43,36 +36,40 @@ pub fn handleTankInput() !void {
         "\nAbility 2: Taunt Enemy Team" ++
         "\nAbility 3: Increase Resistance" ++
         "\nEnter which ability you'd like to have the tank use: ");
-
-    switch (abilityChoice) {
-        '1' => {
-            const enemyChoice = try getCharInput("\nEnter which enemy you'd like to attack [1. Front] [2. Middle] [3. Rear]: ");
-            // There should be logic checking to ensure enemy is within range
-            // Functions to apply damage to enemy of choice
-            // Should be average damage, consider adding a stun by random chance
-            try stdout.print("\nEnemy {c} has been hit!", .{enemyChoice});
-            try stdout.flush();
-        },
-        '2' => {
-            // The enemies are forced to attack the tank for a set number of turns
-            // The tank should be unable to act for a set number of turns
-            // Consider combining this and the third ability
-            try stdout.print("\nThe enemy party has taken notice of the tanks presence!", .{});
-            try stdout.flush();
-        },
-        '3' => {
-            // The tank has increased resistance to physical attacks
-            // The resistance can be either the inability to take damage OR
-            // The ability to take less damage
-            // Considering comibing this with the second ability
-            // Possibly replacing this ability with a taunt and a doubling of damage
-            try stdout.print("\nThe tanks defenses have been bolstered!", .{});
-            try stdout.flush();
-        },
-        else => {
-            try stdout.print("Invalid Input. Please try again!", .{});
-            try stdout.flush();
-        },
+    while (true) {
+        switch (abilityChoice) {
+            '1' => {
+                const enemyChoice = try getCharInput("\nEnter which enemy you'd like to attack [1. Front] [2. Middle] [3. Rear]: ");
+                // There should be logic checking to ensure enemy is within range
+                // Functions to apply damage to enemy of choice
+                // Should be average damage, consider adding a stun by random chance
+                try stdout.print("\nEnemy {c} has been hit!", .{enemyChoice});
+                try stdout.flush();
+                break;
+            },
+            '2' => {
+                // The enemies are forced to attack the tank for a set number of turns
+                // The tank should be unable to act for a set number of turns
+                // Consider combining this and the third ability
+                try stdout.print("\nThe enemy party has taken notice of the tanks presence!", .{});
+                try stdout.flush();
+                break;
+            },
+            '3' => {
+                // The tank has increased resistance to physical attacks
+                // The resistance can be either the inability to take damage OR
+                // The ability to take less damage
+                // Considering comibing this with the second ability
+                // Possibly replacing this ability with a taunt and a doubling of damage
+                try stdout.print("\nThe tanks defenses have been bolstered!", .{});
+                try stdout.flush();
+                break;
+            },
+            else => {
+                try stdout.print("Invalid Input. Please try again!", .{});
+                try stdout.flush();
+            },
+        }
     }
 }
 
@@ -82,29 +79,34 @@ pub fn handleArcherInput() !void {
         "\nAbility 3: Aim Sights" ++
         "\nEnter which ability you'd like to have the archer use: ");
 
-    switch (abilityChoice) {
-        '1' => {
-            const enemyChoice = try getCharInput("\nEnter which enemy you'd like to attack [1. Front] [2. Middle] [3. Rear]: ");
+    while (true) {
+        switch (abilityChoice) {
+            '1' => {
+                const enemyChoice = try getCharInput("\nEnter which enemy you'd like to attack [1. Front] [2. Middle] [3. Rear]: ");
 
-            // Enemy takes average damage on hit
-            try stdout.print("\nEnemy {c} has been hit!", .{enemyChoice});
-            try stdout.flush();
-        },
-        '2' => {
-            // Less than average damage is applied to the every enemy
-            try stdout.print("\nThe enemy party has been hit!", .{});
-            try stdout.flush();
-        },
-        '3' => {
-            // The archer should be unable to attack for a single turn
-            // On next available aciton, the archer will apply double damage
-            try stdout.print("\nThe archer takes aim!", .{});
-            try stdout.flush();
-        },
-        else => {
-            try stdout.print("Invalid Input. Please try again!", .{});
-            try stdout.flush();
-        },
+                // Enemy takes average damage on hit
+                try stdout.print("\nEnemy {c} has been hit!", .{enemyChoice});
+                try stdout.flush();
+                break;
+            },
+            '2' => {
+                // Less than average damage is applied to the every enemy
+                try stdout.print("\nThe enemy party has been hit!", .{});
+                try stdout.flush();
+                break;
+            },
+            '3' => {
+                // The archer should be unable to attack for a single turn
+                // On next available aciton, the archer will apply double damage
+                try stdout.print("\nThe archer takes aim!", .{});
+                try stdout.flush();
+                break;
+            },
+            else => {
+                try stdout.print("Invalid Input. Please try again!", .{});
+                try stdout.flush();
+            },
+        }
     }
 }
 
@@ -113,22 +115,26 @@ pub fn handlePriestInput() !void {
         "\nAbility 2: Buff Team" ++
         "\nEnter which ability you'd like to have the priest use: ");
 
-    switch (abilityChoice) {
-        '1' => {
-            const teamChoice = try getCharInput("\nEnter which team member you'd like to have attack [1. Tank] [2. Archer] [3. Priest]: ");
-            // Heal team member by average amount
-            try stdout.print("\nTeam member {c} has been healed!", .{teamChoice});
-            try stdout.flush();
-        },
-        '2' => {
-            // Every living team member gains some resitance and/or health regen for a set amount of turns
-            try stdout.print("The team thrives!", .{});
-            try stdout.flush();
-        },
-        else => {
-            try stdout.print("Invalid Input. Please try again!", .{});
-            try stdout.flush();
-        },
+    while (true) {
+        switch (abilityChoice) {
+            '1' => {
+                const teamChoice = try getCharInput("\nEnter which team member you'd like to have attack [1. Tank] [2. Archer] [3. Priest]: ");
+                // Heal team member by average amount
+                try stdout.print("\nTeam member {c} has been healed!", .{teamChoice});
+                try stdout.flush();
+                break;
+            },
+            '2' => {
+                // Every living team member gains some resitance and/or health regen for a set amount of turns
+                try stdout.print("The team thrives!", .{});
+                try stdout.flush();
+                break;
+            },
+            else => {
+                try stdout.print("Invalid Input. Please try again!", .{});
+                try stdout.flush();
+            },
+        }
     }
 }
 
