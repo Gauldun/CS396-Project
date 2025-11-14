@@ -26,8 +26,14 @@ pub fn getCharInput(prompt: []const u8) !u8 {
     try stdout.flush();
 
     const choice = try stdin.takeByte();
-    _ = try stdin.takeByte(); // Consumes '\n'
 
+    // Consumes any extra input
+    while (true) {
+        const extraByte = try stdin.takeByte();
+        if (extraByte == '\n') {
+            break;
+        }
+    }
     return choice;
 }
 

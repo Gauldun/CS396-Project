@@ -30,9 +30,8 @@ pub fn main() !void {
     const grunt3 = createEnemyChar(50, 20, true);
 
     while (true) {
-        const charChoice = try sys.getCharInput("\nEnter which character you'd like to have act [1. Tank] [2. Archer] [3. Priest]: ");
-
         while (true) {
+            const charChoice = try sys.getCharInput("\nEnter which character you'd like to have act [1. Tank] [2. Archer] [3. Priest]: ");
             switch (charChoice) {
                 '1' => {
                     try sys.handleTankInput();
