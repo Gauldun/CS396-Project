@@ -29,16 +29,28 @@ pub fn main() !void {
     const grunt2 = createEnemyChar(50, 20, true);
     const grunt3 = createEnemyChar(50, 20, true);
 
+    // var playerTeam = [_]*const cpp.PlayerEntityHandle {
+    //     tankChar,
+    //     archerChar,
+    //     priestChar,
+    // };
+
+    const enemyTeam = [_]?*const cpp.EnemyEntityHandle{
+        grunt1,
+        grunt2,
+        grunt3,
+    };
+
     while (true) {
         while (true) {
             const charChoice = try sys.getCharInput("\nEnter which character you'd like to have act [1. Tank] [2. Archer] [3. Priest]: ");
             switch (charChoice) {
                 '1' => {
-                    try sys.handleTankInput();
+                    try sys.handleTankInput(tankChar, &enemyTeam);
                     break;
                 },
                 '2' => {
-                    try sys.handleArcherInput();
+                    try sys.handleArcherInput(archerChar, &enemyTeam);
                     break;
                 },
                 '3' => {

@@ -22,8 +22,8 @@ const setPlayerHealth = cpp.PlayerEntitySetHealth;
 const setEnemyHealth = cpp.EnemyEntitySetHealth;
 
 const EntityHandle = union(enum) {
-    enemy: *const cpp.EnemyEntityHandle,
-    player: *const cpp.PlayerEntityHandle,
+    enemy: ?*const cpp.EnemyEntityHandle,
+    player: ?*const cpp.PlayerEntityHandle,
 };
 
 // Colors codes
@@ -51,7 +51,7 @@ pub fn getCharInput(prompt: []const u8) !u8 {
     return choice;
 }
 
-pub fn handleTankInput() !void {
+pub fn handleTankInput(tank: ?*const cpp.PlayerEntityHandle, enemyTeam: *const [3]?*const cpp.EnemyEntityHandle) !void {
     const abilityChoice = try getCharInput("\nAbility 1: Single Enemy Hit" ++
         "\nAbility 2: Taunt Enemy Team" ++
         "\nAbility 3: Increase Resistance" ++
@@ -60,8 +60,19 @@ pub fn handleTankInput() !void {
         switch (abilityChoice) {
             '1' => {
                 const enemyChoice = try getCharInput("\nEnter which enemy you'd like to attack [1. Front] [2. Middle] [3. Rear]: ");
-                // Functions to apply damage to enemy of choice
-                // Should be average damage, consider adding a stun by random chance
+                const enemyChar = switch (enemyChoice) {
+                    '1' => enemyTeam[0],
+                    '2' => enemyTeam[1],
+                    '3' => enemyTeam[2],
+                    else => continue,
+                };
+
+                const enemyHandle = EntityHandle{ .enemy = enemyChar };
+
+                // Applies tank entities' damage to the health of the chosen grunt
+                // Consider adding a stun feature
+                try applyDamage(enemyHandle, cpp.PlayerEntityGetDamage(@constCast(tank)), cpp.EnemyEntityGetHealth(@constCast(enemyChar)), calcDamage, cpp.EnemyEntitySetHealth);
+
                 try stdout.print("\nEnemy {c} has been hit!", .{enemyChoice});
                 try stdout.flush();
                 break;
@@ -92,7 +103,7 @@ pub fn handleTankInput() !void {
     }
 }
 
-pub fn handleArcherInput() !void {
+pub fn handleArcherInput(archer: ?*const cpp.PlayerEntityHandle, enemyTeam: *const [3]?*const cpp.EnemyEntityHandle) !void {
     const abilityChoice = try getCharInput("\nAbility 1: Single Enemy Hit" ++
         "\nAbility 2: Team Enemy Hits" ++
         "\nAbility 3: Aim Sights" ++
@@ -103,6 +114,18 @@ pub fn handleArcherInput() !void {
             '1' => {
                 const enemyChoice = try getCharInput("\nEnter which enemy you'd like to attack [1. Front] [2. Middle] [3. Rear]: ");
 
+                const enemyChar = switch (enemyChoice) {
+                    '1' => enemyTeam[0],
+                    '2' => enemyTeam[1],
+                    '3' => enemyTeam[2],
+                    else => continue,
+                };
+
+                const enemyHandle = EntityHandle{ .enemy = enemyChar };
+
+                // Applies archer entities' damage to the health of the chosen grunt
+                try applyDamage(enemyHandle, cpp.PlayerEntityGetDamage(archer), cpp.EnemyEntityGetHealth(enemyChar), calcDamage(), cpp.EnemyEntitySetHealth());
+
                 // Enemy takes average damage on hit
                 try stdout.print("\nEnemy {c} has been hit!", .{enemyChoice});
                 try stdout.flush();
@@ -110,6 +133,10 @@ pub fn handleArcherInput() !void {
             },
             '2' => {
                 // Less than average damage is applied to the every enemy
+                for (enemyTeam) |enemy| {
+                    try applyDamage(enemy, (cpp.PlayerEntityGetDamage(archer) / 2), cpp.EnemyEntityGetHealth(enemy), calcDamage(), cpp.EnemyEntitySetHealth());
+                }
+
                 try stdout.print("\nThe enemy party has been hit!", .{});
                 try stdout.flush();
                 break;
@@ -163,6 +190,19 @@ pub fn calcDamage(damage: i32, health: i32) i32 {
     return result;
 }
 
+pub fn applyDamage(handle: EntityHandle, damage: i32, health: i32, calcVal: fn (i32, i32) i32, setHealth: fn (EntityHandle, i32) void) !void {
+    const result = calcVal(damage, health);
+
+    switch (handle) {
+        .enemy => |e_ptr| {
+            setHealth(@constCast(e_ptr), result);
+        },
+        .player => |p_ptr| {
+            setHealth(@constCast(p_ptr), result);
+        },
+    }
+}
+
 // Functional: Returns new modified value after character acquires some modifier (Could be an item or game effect)
 pub fn calcModifiedVal(modifier: i32, currVal: i32) i32 {
     if (currVal == 0) {
@@ -184,16 +224,3 @@ pub fn calcModifiedVal(modifier: i32, currVal: i32) i32 {
 //     const result = calcDamage(damage, health);
 //     setEnemyHealth(@constCast(enemy), result);
 // }
-
-pub fn applyDamage(handle: EntityHandle, damage: i32, health: i32, calcVal: fn (i32, i32) i32, setHealth: fn (*handle, i32) void) !void {
-    const result = calcVal(damage, health);
-
-    switch (handle) {
-        .enemy => |e_ptr| {
-            setHealth(@constCast(e_ptr), result);
-        },
-        .player => |p_ptr| {
-            setHealth(@constCast(p_ptr), result);
-        },
-    }
-}
