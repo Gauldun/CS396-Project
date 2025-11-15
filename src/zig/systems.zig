@@ -124,7 +124,7 @@ pub fn handleArcherInput(archer: ?*const cpp.PlayerEntityHandle, enemyTeam: *con
                 const enemyHandle = EntityHandle{ .enemy = enemyChar };
 
                 // Applies archer entities' damage to the health of the chosen grunt
-                try applyDamage(enemyHandle, cpp.PlayerEntityGetDamage(archer), cpp.EnemyEntityGetHealth(enemyChar), calcDamage(), cpp.EnemyEntitySetHealth());
+                try applyDamage(enemyHandle, cpp.PlayerEntityGetDamage(@constCast(archer)), cpp.EnemyEntityGetHealth(@constCast(enemyChar)), calcDamage, cpp.EnemyEntitySetHealth);
 
                 // Enemy takes average damage on hit
                 try stdout.print("\nEnemy {c} has been hit!", .{enemyChoice});
@@ -134,7 +134,8 @@ pub fn handleArcherInput(archer: ?*const cpp.PlayerEntityHandle, enemyTeam: *con
             '2' => {
                 // Less than average damage is applied to the every enemy
                 for (enemyTeam) |enemy| {
-                    try applyDamage(enemy, (cpp.PlayerEntityGetDamage(archer) / 2), cpp.EnemyEntityGetHealth(enemy), calcDamage(), cpp.EnemyEntitySetHealth());
+                    const enemyHandle = EntityHandle{ .enemy = enemy };
+                    try applyDamage(enemyHandle, cpp.PlayerEntityGetDamage(@constCast(archer)), cpp.EnemyEntityGetHealth(@constCast(enemy)), calcDamage, cpp.EnemyEntitySetHealth);
                 }
 
                 try stdout.print("\nThe enemy party has been hit!", .{});
@@ -190,7 +191,7 @@ pub fn calcDamage(damage: i32, health: i32) i32 {
     return result;
 }
 
-pub fn applyDamage(handle: EntityHandle, damage: i32, health: i32, calcVal: fn (i32, i32) i32, setHealth: fn (EntityHandle, i32) void) !void {
+pub fn applyDamage(handle: EntityHandle, damage: i32, health: i32, calcVal: fn (i32, i32) i32, setHealth: fn (?*anyopaque, i32) callconv(.c) void) !void {
     const result = calcVal(damage, health);
 
     switch (handle) {
