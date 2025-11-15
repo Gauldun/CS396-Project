@@ -21,6 +21,20 @@ pub const stdin = &stdinReader.interface;
 const setPlayerHealth = cpp.PlayerEntitySetHealth;
 const setEnemyHealth = cpp.EnemyEntitySetHealth;
 
+const EntityHandle = union(enum) {
+    enemy: *const cpp.EnemyEntityHandle,
+    player: *const cpp.PlayerEntityHandle,
+};
+
+// Colors codes
+const ANSI_ESC = "\u{1b}";
+const RED = ANSI_ESC ++ "[31m";
+const GREEN = ANSI_ESC ++ "[32m";
+const BLUE = ANSI_ESC ++ "[34m";
+const YELLOW = ANSI_ESC ++ "[33m";
+const COLOR_RESET = ANSI_ESC ++ "[0m";
+
+// Get User Character Input
 pub fn getCharInput(prompt: []const u8) !u8 {
     try stdout.print("{s}", .{prompt});
     try stdout.flush();
@@ -46,7 +60,6 @@ pub fn handleTankInput() !void {
         switch (abilityChoice) {
             '1' => {
                 const enemyChoice = try getCharInput("\nEnter which enemy you'd like to attack [1. Front] [2. Middle] [3. Rear]: ");
-                // There should be logic checking to ensure enemy is within range
                 // Functions to apply damage to enemy of choice
                 // Should be average damage, consider adding a stun by random chance
                 try stdout.print("\nEnemy {c} has been hit!", .{enemyChoice});
@@ -160,14 +173,27 @@ pub fn calcModifiedVal(modifier: i32, currVal: i32) i32 {
     }
 }
 
-// Imperative: Applies resulting damage onto player character
-pub fn applyPlayerDamage(player: *const cpp.PlayerEntityHandle, damage: i32, health: i32) !void {
-    const result = calcDamage(damage, health);
-    setPlayerHealth(@constCast(player), result);
-}
+// // Imperative: Applies resulting damage onto player character
+// pub fn applyPlayerDamage(player: *const cpp.PlayerEntityHandle, damage: i32, health: i32) !void {
+//     const result = calcDamage(damage, health);
+//     setPlayerHealth(@constCast(player), result);
+// }
+//
+// // Imperative: Applies resulting damage onto player character
+// pub fn applyEnemyDamage(enemy: *const cpp.EnemyEntityHandle, damage: i32, health: i32) !void {
+//     const result = calcDamage(damage, health);
+//     setEnemyHealth(@constCast(enemy), result);
+// }
 
-// Imperative: Applies resulting damage onto player character
-pub fn applyEnemyDamage(enemy: *const cpp.EnemyEntityHandle, damage: i32, health: i32) !void {
-    const result = calcDamage(damage, health);
-    setEnemyHealth(@constCast(enemy), result);
+pub fn applyDamage(handle: EntityHandle, damage: i32, health: i32, calcVal: fn (i32, i32) i32, setHealth: fn (*handle, i32) void) !void {
+    const result = calcVal(damage, health);
+
+    switch (handle) {
+        .enemy => |e_ptr| {
+            setHealth(@constCast(e_ptr), result);
+        },
+        .player => |p_ptr| {
+            setHealth(@constCast(p_ptr), result);
+        },
+    }
 }
