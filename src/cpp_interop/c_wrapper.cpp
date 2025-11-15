@@ -52,6 +52,12 @@ int32_t PlayerEntityGetHealth(PlayerEntityHandle *handle) {
   return TO_PLAYER_ENTITY(handle)->getHealth();
 }
 
+int32_t PlayerEntityGetMaxHealth(PlayerEntityHandle *handle) {
+  if (!handle)
+    return 0;
+  return TO_PLAYER_ENTITY(handle)->getMaxHealth();
+}
+
 int32_t PlayerEntityGetDamage(PlayerEntityHandle *handle) {
   if (!handle)
     return 0;
@@ -69,6 +75,12 @@ int32_t EnemyEntityGetHealth(EnemyEntityHandle *handle) {
   if (!handle)
     return 0;
   return TO_ENEMY_ENTITY(handle)->getHealth();
+}
+
+int32_t EnemyEntityGetMaxHealth(EnemyEntityHandle *handle) {
+  if (!handle)
+    return 0;
+  return TO_ENEMY_ENTITY(handle)->getMaxHealth();
 }
 
 int32_t EnemyEntityGetDamage(EnemyEntityHandle *handle) {
@@ -97,6 +109,13 @@ void PlayerEntitySetHealth(PlayerEntityHandle *handle, int32_t newHealth) {
   TO_PLAYER_ENTITY(handle)->setHealth(newHealth);
 }
 
+void PlayerEntitySetMaxHealth(PlayerEntityHandle *handle,
+                              int32_t newMaxHealth) {
+  if (!handle)
+    return;
+  TO_PLAYER_ENTITY(handle)->setMaxHealth(newMaxHealth);
+}
+
 void PlayerEntitySetDamage(PlayerEntityHandle *handle, int32_t newDamage) {
   if (!handle)
     return;
@@ -114,6 +133,12 @@ void EnemyEntitySetHealth(EnemyEntityHandle *handle, int32_t newHealth) {
   if (!handle)
     return;
   TO_ENEMY_ENTITY(handle)->setHealth(newHealth);
+}
+
+void EnemyEntitySetMaxHealth(EnemyEntityHandle *handle, int32_t newMaxHealth) {
+  if (!handle)
+    return;
+  TO_ENEMY_ENTITY(handle)->setMaxHealth(newMaxHealth);
 }
 
 void EnemyEntitySetDamage(EnemyEntityHandle *handle, int32_t newDamage) {

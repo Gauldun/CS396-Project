@@ -30,11 +30,13 @@ int32_t PlayerEntityEquipItem(PlayerEntityHandle *handle, int32_t modifiedVal,
 
 // PlayerEntity Getters
 int32_t PlayerEntityGetHealth(PlayerEntityHandle *handle);
+int32_t PlayerEntityGetMaxHealth(PlayerEntityHandle *handle);
 int32_t PlayerEntityGetDamage(PlayerEntityHandle *handle);
 int32_t PlayerEntityGetTurn(PlayerEntityHandle *handle);
 
 // EnemyEntity Getters
 int32_t EnemyEntityGetHealth(EnemyEntityHandle *handle);
+int32_t EnemyEntityGetMaxHealth(EnemyEntityHandle *handle);
 int32_t EnemyEntityGetDamage(EnemyEntityHandle *handle);
 int32_t EnemyEntityGetTurn(EnemyEntityHandle *handle);
 
@@ -43,11 +45,13 @@ int32_t ItemGetDuration(ItemHandle *handle);
 
 // PlayerEntity Setters
 void PlayerEntitySetHealth(PlayerEntityHandle *handle, int32_t newHealth);
+void PlayerEntitySetMaxHealth(PlayerEntityHandle *handle, int32_t newMaxHealth);
 void PlayerEntitySetDamage(PlayerEntityHandle *handle, int32_t newDamage);
 void PlayerEntitySetTurn(PlayerEntityHandle *handle, int32_t newTurn);
 
 // EnemyEntity Setters
 void EnemyEntitySetHealth(EnemyEntityHandle *handle, int32_t newHealth);
+void EnemyEntitySetMaxHealth(EnemyEntityHandle *handle, int32_t newMaxHealth);
 void EnemyEntitySetDamage(EnemyEntityHandle *handle, int32_t newDamage);
 void EnemyEntitySetTurn(EnemyEntityHandle *handle, int32_t newTurn);
 

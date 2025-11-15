@@ -4,7 +4,7 @@
 class PlayerEntity {
 private:
   // Basic Variables
-  int health{}, damage{};
+  int health{}, maxHealth{}, damage{};
   bool hasTurn{};
 
 public:
@@ -14,18 +14,20 @@ public:
 
   // Getters
   int getHealth();
+  int getMaxHealth();
   int getDamage();
   bool getTurn();
 
   // Setters
   void setHealth(int newHealth);
+  void setMaxHealth(int newMaxHealth);
   void setDamage(int newDamage);
   void setTurn(bool newTurn);
 };
 
 class EnemyEntity {
 private:
-  int health{}, damage{};
+  int health{}, maxHealth{}, damage{};
   bool hasTurn{};
 
 public:
@@ -33,11 +35,13 @@ public:
 
   // Getters
   int getHealth();
+  int getMaxHealth();
   int getDamage();
   bool getTurn();
 
   // Setters
   void setHealth(int newHealth);
+  void setMaxHealth(int newMaxHealth);
   void setDamage(int newDamage);
   void setTurn(bool newTurn);
 };

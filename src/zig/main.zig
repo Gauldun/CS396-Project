@@ -29,11 +29,11 @@ pub fn main() !void {
     const grunt2 = createEnemyChar(50, 20, true);
     const grunt3 = createEnemyChar(50, 20, true);
 
-    // var playerTeam = [_]*const cpp.PlayerEntityHandle {
-    //     tankChar,
-    //     archerChar,
-    //     priestChar,
-    // };
+    var playerTeam = [_]?*const cpp.PlayerEntityHandle{
+        tankChar,
+        archerChar,
+        priestChar,
+    };
 
     const enemyTeam = [_]?*const cpp.EnemyEntityHandle{
         grunt1,
@@ -43,7 +43,7 @@ pub fn main() !void {
 
     while (true) {
         while (true) {
-            const charChoice = try sys.getCharInput("\nEnter which character you'd like to have act [1. Tank] [2. Archer] [3. Priest]: ");
+            const charChoice = try sys.getCharInput(sys.COLOR_HERO ++ "\nEnter which character you'd like to have act [1. Tank] [2. Archer] [3. Priest]: " ++ sys.ANSI_RESET);
             switch (charChoice) {
                 '1' => {
                     try sys.handleTankInput(tankChar, &enemyTeam);
@@ -54,11 +54,11 @@ pub fn main() !void {
                     break;
                 },
                 '3' => {
-                    try sys.handlePriestInput();
+                    try sys.handlePriestInput(&playerTeam);
                     break;
                 },
                 else => {
-                    try stdout.print("Invalid Input. Please try again!", .{});
+                    try stdout.print(sys.COLOR_ERROR ++ "Invalid Input. Please try again!" ++ sys.ANSI_RESET, .{});
                     try stdout.flush();
                 },
             }
