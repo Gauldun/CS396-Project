@@ -54,7 +54,7 @@ pub fn main() !void {
                     break;
                 },
                 '3' => {
-                    try sys.handlePriestInput(&playerTeam);
+                    try sys.handlePriestInput(priestChar, &playerTeam);
                     break;
                 },
                 else => {

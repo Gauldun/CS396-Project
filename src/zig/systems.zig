@@ -188,7 +188,7 @@ pub fn handleArcherInput(archer: ?*const PlayerHandle, enemyTeam: *const [3]?*co
                 // Less than average damage is applied to the every enemy
                 for (enemyTeam) |enemy| {
                     const enemyHandle = EntityHandle{ .enemy = enemy };
-                    try updateHealth(enemyHandle, getPlayerDamage(@constCast(archer)) / 2, getEnemyHealth(@constCast(enemy)), null, calcDamage, setEnemyHealth);
+                    try updateHealth(enemyHandle, @divFloor(getPlayerDamage(@constCast(archer)), 2), getEnemyHealth(@constCast(enemy)), null, calcDamage, setEnemyHealth);
                 }
 
                 try stdout.print(COLOR_DAMAGE ++ "\nThe enemy party has been hit!" ++ ANSI_RESET, .{});
@@ -224,6 +224,7 @@ pub fn handlePriestInput(priest: ?*const PlayerHandle, playerTeam: *const [3]?*c
                     '1' => playerTeam[0],
                     '2' => playerTeam[1],
                     '3' => playerTeam[2],
+                    else => continue,
                 };
 
                 const playerHandle = EntityHandle{ .player = teamChar };
@@ -250,23 +251,25 @@ pub fn handlePriestInput(priest: ?*const PlayerHandle, playerTeam: *const [3]?*c
 }
 
 // Functional: Returns new health value after character takes damage
-fn calcDamage(damage: i32, health: i32) i32 {
+fn calcDamage(damage: i32, health: i32, maxHealth: ?i32) i32 {
+    _ = maxHealth; // Consume unecessary constant
     const result = if ((health - damage) <= 0) 0 else health - damage;
     return result;
 }
 
-fn calcHeal(heal: i32, health: i32, maxHealth: i32) i32 {
-    const result = if ((health + heal) >= maxHealth) maxHealth else health + heal;
+fn calcHeal(heal: i32, health: i32, maxHealth: ?i32) i32 {
+    const mHealth = maxHealth.?;
+    const result = if ((health + heal) >= mHealth) mHealth else health + heal;
     return result;
 }
 
-// Applies damage to specific entities based on given handle, and given setter function
+// Applies damage or healing effect based on given functions
 fn updateHealth(handle: EntityHandle, damage: i32, health: i32, maxHealth: ?i32, calcVal: fn (i32, i32, ?i32) i32, setHealth: fn (?*anyopaque, i32) callconv(.c) void) !void {
     var result: i32 = 0;
-    const paramCount = @typeInfo(@TypeOf(calcVal)).Fn.params.len;
+    const paramCount = @typeInfo(@TypeOf(calcVal)).@"fn".params.len;
 
     if (paramCount == 2) {
-        result = calcVal(damage, health);
+        result = calcVal(damage, health, maxHealth);
     } else if (paramCount == 3) {
         result = calcVal(damage, health, maxHealth);
     } else {
