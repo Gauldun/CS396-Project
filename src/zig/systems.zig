@@ -104,6 +104,22 @@ pub fn getCharInput(prompt: []const u8) !u8 {
     return choice;
 }
 
+// Displays stats in regards to Player and Enemy party health, if they are dead, and any buffs they may have
+// pub fn displayStats(playerTeam: *const [3]?*const PlayerHandle, enemyTeam: *const [3]?*const EnemyHandle) void {
+//
+//     const tank = playerTeam[0];
+//     const archer = playerTeam[1];
+//     const priest = playerTeam[2];
+//
+//     const enemyFront = enemyTeam[0];
+//     const enemyMiddle = enemyTeam[1];
+//     const enemyRear = enemyTeam[2];
+//
+//     // Display Health
+//     stdout.print(COLOR_HERO ++ "Player's Team Status: " ++
+//     COLOR_HERO ++ "", .{});
+// }
+
 pub fn handleTankInput(tank: ?*const PlayerHandle, enemyTeam: *const [3]?*const EnemyHandle) !void {
     const abilityChoice = try getCharInput(COLOR_HERO ++ "\nAbility 1: " ++ COLOR_ABILITY ++ "Single Enemy Hit" ++
         COLOR_HERO ++ "\nAbility 2: " ++ COLOR_ABILITY ++ "Taunt Enemy Team" ++
@@ -265,16 +281,7 @@ fn calcHeal(heal: i32, health: i32, maxHealth: ?i32) i32 {
 
 // Applies damage or healing effect based on given functions
 fn updateHealth(handle: EntityHandle, damage: i32, health: i32, maxHealth: ?i32, calcVal: fn (i32, i32, ?i32) i32, setHealth: fn (?*anyopaque, i32) callconv(.c) void) !void {
-    var result: i32 = 0;
-    const paramCount = @typeInfo(@TypeOf(calcVal)).@"fn".params.len;
-
-    if (paramCount == 2) {
-        result = calcVal(damage, health, maxHealth);
-    } else if (paramCount == 3) {
-        result = calcVal(damage, health, maxHealth);
-    } else {
-        @compileError("Error: Incorrect Function Usage!");
-    }
+    const result = calcVal(damage, health, maxHealth);
 
     switch (handle) {
         .enemy => |e_ptr| {
