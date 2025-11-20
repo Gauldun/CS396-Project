@@ -62,8 +62,10 @@ pub fn main() !void {
                     try stdout.flush();
                 },
             }
-        }
-    }
+        } // End Player Character Handling Loop
+        try sys.displayStats(&playerTeam, &enemyTeam);
+    } // End of Game Loop
+
     // Call Destructors
     destroyPlayerChar(tankChar);
     destroyPlayerChar(priestChar);

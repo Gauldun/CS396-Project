@@ -105,20 +105,24 @@ pub fn getCharInput(prompt: []const u8) !u8 {
 }
 
 // Displays stats in regards to Player and Enemy party health, if they are dead, and any buffs they may have
-// pub fn displayStats(playerTeam: *const [3]?*const PlayerHandle, enemyTeam: *const [3]?*const EnemyHandle) void {
-//
-//     const tank = playerTeam[0];
-//     const archer = playerTeam[1];
-//     const priest = playerTeam[2];
-//
-//     const enemyFront = enemyTeam[0];
-//     const enemyMiddle = enemyTeam[1];
-//     const enemyRear = enemyTeam[2];
-//
-//     // Display Health
-//     stdout.print(COLOR_HERO ++ "Player's Team Status: " ++
-//     COLOR_HERO ++ "", .{});
-// }
+pub fn displayStats(playerTeam: *const [3]?*const PlayerHandle, enemyTeam: *const [3]?*const EnemyHandle) !void {
+    const tank = playerTeam[0];
+    const archer = playerTeam[1];
+    const priest = playerTeam[2];
+
+    const enemyFront = enemyTeam[0];
+    const enemyMiddle = enemyTeam[1];
+    const enemyRear = enemyTeam[2];
+
+    // Display Health
+    try stdout.print(COLOR_HERO ++ "\nPlayer's Team Status: " ++
+        COLOR_HERO ++ "\nTank Health: " ++ COLOR_HEAL ++ "{d}" ++
+        COLOR_HERO ++ "\nArcher Health: " ++ COLOR_HEAL ++ "{d}" ++
+        COLOR_HERO ++ "\nPriest Health: " ++ COLOR_HEAL ++ "{d}" ++
+        COLOR_ENEMY ++ "\nEnemy Front Health: " ++ COLOR_HEAL ++ "{d}" ++
+        COLOR_ENEMY ++ "\nEnemy Middle Health: " ++ COLOR_HEAL ++ "{d}" ++
+        COLOR_ENEMY ++ "\nEnemy Rear Health: " ++ COLOR_HEAL ++ "{d}\n" ++ ANSI_RESET, .{ getPlayerHealth(@constCast(tank)), getPlayerHealth(@constCast(archer)), getPlayerHealth(@constCast(priest)), getEnemyHealth(@constCast(enemyFront)), getEnemyHealth(@constCast(enemyMiddle)), getEnemyHealth(@constCast(enemyRear)) });
+}
 
 pub fn handleTankInput(tank: ?*const PlayerHandle, enemyTeam: *const [3]?*const EnemyHandle) !void {
     const abilityChoice = try getCharInput(COLOR_HERO ++ "\nAbility 1: " ++ COLOR_ABILITY ++ "Single Enemy Hit" ++
