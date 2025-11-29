@@ -271,8 +271,7 @@ pub fn handlePriestInput(priest: ?*const PlayerHandle, playerTeam: *const [3]?*c
 }
 
 // Functional: Returns new health value after character takes damage
-fn calcDamage(damage: i32, health: i32, maxHealth: ?i32) i32 {
-    _ = maxHealth; // Consume unecessary constant
+fn calcDamage(damage: i32, health: i32, _: ?i32) i32 {
     const result = if ((health - damage) <= 0) 0 else health - damage;
     return result;
 }
@@ -297,12 +296,34 @@ fn updateHealth(handle: EntityHandle, damage: i32, health: i32, maxHealth: ?i32,
     }
 }
 
-// // Functional: Returns new modified value after character acquires some modifier (Could be an item or game effect)
-// pub fn calcModifiedVal(modifier: i32, currVal: i32) i32 {
-//     if (currVal == 0) {
-//         return currVal;
-//     } else {
-//         const result = if ((currVal * modifier) <= 1) 1 else currVal * modifier;
-//         return result;
-//     }
-// }
+// To be used depending on modifier
+fn add(currVal: i32, modVal: i32) i32 {
+    return currVal + modVal;
+}
+
+fn subtract(currVal: i32, modVal: i32) i32 {
+    const result = if ((currVal - modVal) <= 0) 0 else currVal - modVal;
+    return result;
+}
+
+fn mult(currVal: i32, modVal: i32) i32 {
+    return currVal * modVal;
+}
+
+fn divide(currVal: i32, modVal: i32) i32 {
+    return currVal / modVal;
+}
+
+// Updates character stats based on given buffs or items
+fn updateStat(handle: EntityHandle, currVal: i32, modVal: i32, calcVal: fn (i32, i32) i32, setVal: fn (?*anyopaque, i32) callconv(.c) void) !void {
+    const result = calcVal(currVal, modVal);
+
+    switch (handle) {
+        .enemy => |e_ptr| {
+            setVal(@constCast(e_ptr), result);
+        },
+        .player => |p_ptr| {
+            setVal(@constCast(p_ptr), result);
+        },
+    }
+}
