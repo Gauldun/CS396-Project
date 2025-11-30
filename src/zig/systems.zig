@@ -144,6 +144,8 @@ pub fn displayStats(playerTeam: *const [3]?*const PlayerHandle, enemyTeam: *cons
 }
 
 pub fn handleTankInput(tank: ?*const PlayerHandle, enemyTeam: *const [3]?*const EnemyHandle, buffs: *arrayList(ActiveBuff)) !void {
+    try stdout.print(COLOR_HERO ++ "\nIT'S THE TANK'S TURN!" ++ ANSI_RESET, .{});
+    try stdout.flush();
     const tankHandle = EntityHandle{ .player = tank };
     while (true) {
         const abilityChoice = try getCharInput(COLOR_HERO ++ "\nAbility 1: " ++ COLOR_ABILITY ++ "Single Enemy Hit" ++
@@ -202,6 +204,8 @@ pub fn handleTankInput(tank: ?*const PlayerHandle, enemyTeam: *const [3]?*const 
 }
 
 pub fn handleArcherInput(archer: ?*const PlayerHandle, enemyTeam: *const [3]?*const EnemyHandle, buffs: *arrayList(ActiveBuff)) !void {
+    try stdout.print(COLOR_HERO ++ "\nIT'S THE ARCHER'S TURN!" ++ ANSI_RESET, .{});
+    try stdout.flush();
     const archerHandle = EntityHandle{ .player = archer };
     while (true) {
         const abilityChoice = try getCharInput(COLOR_HERO ++ "\nAbility 1: " ++ COLOR_ABILITY ++ "Single Enemy Hit" ++
@@ -263,6 +267,8 @@ pub fn handleArcherInput(archer: ?*const PlayerHandle, enemyTeam: *const [3]?*co
 }
 
 pub fn handlePriestInput(priest: ?*const PlayerHandle, playerTeam: *const [3]?*const PlayerHandle, buffs: *arrayList(ActiveBuff)) !void {
+    try stdout.print(COLOR_HERO ++ "\nIT'S PRIEST'S TURN!" ++ ANSI_RESET, .{});
+    try stdout.flush();
     while (true) {
         const abilityChoice = try getCharInput(COLOR_HERO ++ "\nAbility 1: " ++ COLOR_ABILITY ++ "Single Team Member Heal" ++
             COLOR_HERO ++ "\nAbility 2: " ++ COLOR_ABILITY ++ "Buff Team" ++
@@ -270,7 +276,7 @@ pub fn handlePriestInput(priest: ?*const PlayerHandle, playerTeam: *const [3]?*c
 
         switch (abilityChoice) {
             '1' => {
-                const teamChoice = try getCharInput(COLOR_HERO ++ "\nEnter which team member you'd like to healed [1. Tank] [2. Archer] [3. Priest]: " ++ ANSI_RESET);
+                const teamChoice = try getCharInput(COLOR_HERO ++ "\nEnter which team member you'd like to heal [1. Tank] [2. Archer] [3. Priest]: " ++ ANSI_RESET);
 
                 const teamChar = switch (teamChoice) {
                     '1' => playerTeam[0],
@@ -323,6 +329,9 @@ pub fn handlePriestInput(priest: ?*const PlayerHandle, playerTeam: *const [3]?*c
 }
 
 pub fn handleGruntTurn(grunt: ?*const EnemyHandle, playerTeam: *const [3]?*const PlayerHandle, buffs: *arrayList(ActiveBuff), randAbility: usize, randChar: usize) !void {
+    try stdout.print(COLOR_ENEMY ++ "\nTHE GRUNT TAKES IT'S TURN!" ++ ANSI_RESET, .{});
+    try stdout.flush();
+
     const playerMember = playerTeam[randChar];
     const playerHandle = EntityHandle{ .player = playerMember };
     switch (randAbility) {

@@ -32,7 +32,7 @@ pub fn main() !void {
     // Tank Player Party Character w/ Base Stats; 100 Health, 15 Damage, 25% Defense
     const tankChar = createPlayerChar(100, 15, 25);
     // Priest Player Party Character w/ Base Stats; 50 Health, 0 Damage, 10% Defense
-    const priestChar = createPlayerChar(50, 0, 10);
+    const priestChar = createPlayerChar(50, 20, 10);
     // Archer Player Party Character w/ Base Stats; 75 Health, 30 Damge, 15% Defense
     const archerChar = createPlayerChar(75, 30, 15);
 
