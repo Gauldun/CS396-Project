@@ -1,8 +1,8 @@
 #include "entities.hpp"
 
 // PlayerEntity Methods
-PlayerEntity::PlayerEntity(int hVal, int dVal, bool tVal)
-    : health{hVal}, maxHealth{hVal}, damage{dVal}, hasTurn{tVal} {}
+PlayerEntity::PlayerEntity(int hVal, int dVal, int defVal)
+    : health{hVal}, maxHealth{hVal}, damage{dVal}, defense{defVal} {}
 
 int PlayerEntity::equipItem(int modifiedVal, int newItemMod, int oldItemMod) {
   modifiedVal = -(oldItemMod) + newItemMod;
@@ -13,37 +13,43 @@ int PlayerEntity::equipItem(int modifiedVal, int newItemMod, int oldItemMod) {
 int PlayerEntity::getHealth() { return health; }
 int PlayerEntity::getMaxHealth() { return maxHealth; }
 int PlayerEntity::getDamage() { return damage; }
-bool PlayerEntity::getTurn() { return hasTurn; }
+int PlayerEntity::getDefense() { return defense; }
 
 // Setters
 void PlayerEntity::setHealth(int newHealth) { health = newHealth; }
 void PlayerEntity::setMaxHealth(int newMaxHealth) { maxHealth = newMaxHealth; }
 void PlayerEntity::setDamage(int newDamage) { damage = newDamage; }
-void PlayerEntity::setTurn(bool newTurn) { hasTurn = newTurn; }
+void PlayerEntity::setDefense(int newDefense) { defense = newDefense; }
 
 // EnemyEntity Methods
-EnemyEntity::EnemyEntity(int hVal, int dVal, bool tVal)
-    : health{hVal}, maxHealth{hVal}, damage{dVal}, hasTurn{tVal} {}
+EnemyEntity::EnemyEntity(int hVal, int dVal, int defVal)
+    : health{hVal}, maxHealth{hVal}, damage{dVal}, defense{defVal} {}
 
 // Getters
 int EnemyEntity::getHealth() { return health; }
 int EnemyEntity::getMaxHealth() { return maxHealth; }
 int EnemyEntity::getDamage() { return damage; }
-bool EnemyEntity::getTurn() { return hasTurn; }
+int EnemyEntity::getDefense() { return defense; }
 
 // Setters
 void EnemyEntity::setHealth(int newHealth) { health = newHealth; }
 void EnemyEntity::setMaxHealth(int newMaxHealth) { maxHealth = newMaxHealth; }
 void EnemyEntity::setDamage(int newDamage) { damage = newDamage; }
-void EnemyEntity::setTurn(bool newTurn) { hasTurn = newTurn; }
+void EnemyEntity::setDefense(int newDefense) { defense = newDefense; }
 
 // Item Methods
-Item::Item(bool dmgBool, bool suppBool, bool effectBool, int durVal)
-    : doesDamage{dmgBool}, hasSupport{suppBool}, hasEffect{effectBool},
-      duration{durVal} {}
+Item::Item(int dVal, int hVal, int defVal, int sDVal)
+    : damage{dVal}, health{hVal}, defense{defVal}, selfDamage{sDVal} {}
 
 // Getters
-int Item::getDuration() { return duration; }
+int Item::getDamage() { return damage; }
+int Item::getHealth() { return health; }
+int Item::getDefense() { return defense; }
+int Item::getSelfDamage() { return selfDamage; }
 
 // Setters
-void Item::setDuration(int newDur) { duration = newDur; }
+// Probably useless but just in case
+void Item::setDamage(int newDamage) { damage = newDamage; }
+void Item::setHealth(int newHealth) { health = newHealth; }
+void Item::setDefense(int newDefense) { defense = newDefense; }
+void Item::setSelfDamage(int newSelfDamage) { selfDamage = newSelfDamage; }

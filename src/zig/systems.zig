@@ -17,31 +17,44 @@ var stdinBuffer: [1024]u8 = undefined;
 var stdinReader = std.fs.File.stdin().reader(&stdinBuffer);
 pub const stdin = &stdinReader.interface;
 
-// Info variable
+// Array declaration variable
+pub const ArrayList = std.ArrayList;
 
 // Player Entity Getters
 const getPlayerHealth = cpp.PlayerEntityGetHealth;
 const getPlayerMaxHealth = cpp.PlayerEntityGetMaxHealth;
 const getPlayerDamage = cpp.PlayerEntityGetDamage;
-const getPlayerTurn = cpp.PlayerEntityGetTurn;
+const getPlayerDefense = cpp.PlayerEntityGetDefense;
 
 // Player Entity Setters
 const setPlayerHealth = cpp.PlayerEntitySetHealth;
 const setPlayerMaxHealth = cpp.PlayerEntitySetMaxHealth;
 const setPlayerDamage = cpp.PlayerEntitySetDamage;
-const setPlayerTurn = cpp.PlayerEntitySetTurn;
+const setPlayerDefense = cpp.PlayerEntitySetDefense;
 
 // Enemy Entity Getters
 const getEnemyHealth = cpp.EnemyEntityGetHealth;
 const getEnemyMaxHealth = cpp.EnemyEntityGetMaxHealth;
 const getEnemyDamage = cpp.EnemyEntityGetDamage;
-const getEnemyTurn = cpp.EnemyEntityGetTurn;
+const getEnemyDefense = cpp.EnemyEntityGetDefense;
 
 // Enemy Entity Setters
 const setEnemyHealth = cpp.EnemyEntitySetHealth;
 const setEnemyMaxHealth = cpp.EnemyEntitySetMaxHealth;
 const setEnemyDamage = cpp.EnemyEntitySetDamage;
-const setEnemyTurn = cpp.EnemyEntitySetTurn;
+const setEnemyDefense = cpp.EnemyEntitySetDefense;
+
+// Item Getters
+const getItemHealth = cpp.ItemGetHealth;
+const getItemDamage = cpp.ItemGetDamage;
+const getItemDefense = cpp.ItemGetDamage;
+const getItemSelfDamage = cpp.ItemGetSelfDamage;
+
+// Item Setters
+const setItemHealth = cpp.ItemSetHealth;
+const setItemDamage = cpp.ItemSetDamage;
+const setItemDefense = cpp.ItemSetDefense;
+const setItemSelfDamage = cpp.ItemSetSelfDamage;
 
 // Entity Constants
 const PlayerHandle = cpp.PlayerEntityHandle;
@@ -52,6 +65,12 @@ const EntityHandle = union(enum) {
     enemy: ?*const EnemyHandle,
     player: ?*const PlayerHandle,
 };
+
+// Used for holding buff type
+const StatType = enum { Damage, Defense, MaxHealth };
+
+//Used for reverting active buffs
+pub const ActiveBuff = struct { handle: EntityHandle, stat: StatType, revertVal: i32, duration: i32, revertFn: fn (i32, i32) i32, setFn: fn (?*anyopaque, i32) callconv(.c) void };
 
 // Colors codes
 const ANSI_ESC = "\u{1b}";
@@ -124,12 +143,14 @@ pub fn displayStats(playerTeam: *const [3]?*const PlayerHandle, enemyTeam: *cons
         COLOR_ENEMY ++ "\nEnemy Rear Health: " ++ COLOR_HEAL ++ "{d}\n" ++ ANSI_RESET, .{ getPlayerHealth(@constCast(tank)), getPlayerHealth(@constCast(archer)), getPlayerHealth(@constCast(priest)), getEnemyHealth(@constCast(enemyFront)), getEnemyHealth(@constCast(enemyMiddle)), getEnemyHealth(@constCast(enemyRear)) });
 }
 
-pub fn handleTankInput(tank: ?*const PlayerHandle, enemyTeam: *const [3]?*const EnemyHandle) !void {
-    const abilityChoice = try getCharInput(COLOR_HERO ++ "\nAbility 1: " ++ COLOR_ABILITY ++ "Single Enemy Hit" ++
-        COLOR_HERO ++ "\nAbility 2: " ++ COLOR_ABILITY ++ "Taunt Enemy Team" ++
-        COLOR_HERO ++ "\nAbility 3: " ++ COLOR_ABILITY ++ "Increase Resistance" ++
-        COLOR_HERO ++ "\nEnter which ability you'd like to have the tank use: " ++ ANSI_RESET);
+pub fn handleTankInput(tank: ?*const PlayerHandle, enemyTeam: *const [3]?*const EnemyHandle, buffs: *ArrayList(ActiveBuff)) !void {
+    const tankHandle = EntityHandle{ .player = tank };
     while (true) {
+        const abilityChoice = try getCharInput(COLOR_HERO ++ "\nAbility 1: " ++ COLOR_ABILITY ++ "Single Enemy Hit" ++
+            COLOR_HERO ++ "\nAbility 2: " ++ COLOR_ABILITY ++ "Taunt Enemy Team & Increase Resistance" ++
+            COLOR_HERO ++ "\nAbility 3: " ++ COLOR_ABILITY ++ "Taunt Enemy Team & Increase Damage" ++
+            COLOR_HERO ++ "\nEnter which ability you'd like to have the tank use: " ++ ANSI_RESET);
+
         switch (abilityChoice) {
             '1' => {
                 const enemyChoice = try getCharInput(COLOR_HERO ++ "\nEnter which enemy you'd like to attack [1. Front] [2. Middle] [3. Rear]: " ++ ANSI_RESET);
@@ -144,27 +165,31 @@ pub fn handleTankInput(tank: ?*const PlayerHandle, enemyTeam: *const [3]?*const 
 
                 // Applies tank entities' damage to the health of the chosen grunt
                 // Consider adding a stun feature
-                try updateHealth(enemyHandle, getPlayerDamage(@constCast(tank)), getEnemyHealth(@constCast(enemyChar)), null, calcDamage, setEnemyHealth);
+                const currDmg = getPlayerDamage(@constCast(tank)); // Gets tanks current damage stat
+                const currHealth = getEnemyHealth(@constCast(enemyChar)); // Gets Current Enemy Health
+
+                try updateHealth(enemyHandle, currDmg, currHealth, null, calcDamage, setEnemyHealth);
 
                 try stdout.print(COLOR_DAMAGE ++ "\nEnemy {c} has been hit!" ++ ANSI_RESET, .{enemyChoice});
                 try stdout.flush();
                 break;
             },
             '2' => {
-                // The enemies are forced to attack the tank for a set number of turns
-                // The tank should be unable to act for a set number of turns
-                // Consider combining this and the third ability
-                try stdout.print(COLOR_DEBUFF ++ "\nThe enemy party has taken notice of the tanks presence!" ++ ANSI_RESET, .{});
+                // The tank has increased damage resist for 2 turns and taunts enemy team for 3 turns
+                const currDef = getPlayerDefense(@constCast(tank)); // Gets Tanks current defense stat
+                // Doubles current defense stat for 2 turns
+                try applyBuff(&buffs, tankHandle, .Defense, currDef, 2, 2, 2, mult, divide, setPlayerDefense);
+
+                try stdout.print(COLOR_BUFF ++ "\nThe tanks defenses have been bolstered! " ++ COLOR_DEBUFF ++ "But, the enemy party has taken notice of the tanks presence!" ++ ANSI_RESET, .{});
                 try stdout.flush();
                 break;
             },
             '3' => {
-                // The tank has increased resistance to physical attacks
-                // The resistance can be either the inability to take damage OR
-                // The ability to take less damage
-                // Considering comibing this with the second ability
-                // Possibly replacing this ability with a taunt and a doubling of damage
-                try stdout.print(COLOR_BUFF ++ "\nThe tanks defenses have been bolstered!" ++ ANSI_RESET, .{});
+                // The tank has increased damage and taunts enemy team
+                const currDmg = getPlayerDamage(@constCast(tank)); // Gets Tanks current damage stat
+                // Triples current damage stat for 2 turns
+                try applyBuff(&buffs, tankHandle, .Damage, currDmg, 3, 3, 2, mult, divide, setPlayerDamage);
+                try stdout.print(COLOR_BUFF ++ "\nThe tanks weapons have been emboldened! " ++ COLOR_DEBUFF ++ "But, the enemy party has taken notice of the tanks presence!" ++ ANSI_RESET, .{});
                 try stdout.flush();
                 break;
             },
@@ -176,13 +201,14 @@ pub fn handleTankInput(tank: ?*const PlayerHandle, enemyTeam: *const [3]?*const 
     }
 }
 
-pub fn handleArcherInput(archer: ?*const PlayerHandle, enemyTeam: *const [3]?*const EnemyHandle) !void {
-    const abilityChoice = try getCharInput(COLOR_HERO ++ "\nAbility 1: " ++ COLOR_ABILITY ++ "Single Enemy Hit" ++
-        COLOR_HERO ++ "\nAbility 2: " ++ COLOR_ABILITY ++ "Team Enemy Hits" ++
-        COLOR_HERO ++ "\nAbility 3: " ++ COLOR_ABILITY ++ "Aim Sights" ++
-        COLOR_HERO ++ "\nEnter which ability you'd like to have the archer use: " ++ ANSI_RESET);
-
+pub fn handleArcherInput(archer: ?*const PlayerHandle, enemyTeam: *const [3]?*const EnemyHandle, buffs: *ArrayList(ActiveBuff)) !void {
+    const archerHandle = EntityHandle{ .player = archer };
     while (true) {
+        const abilityChoice = try getCharInput(COLOR_HERO ++ "\nAbility 1: " ++ COLOR_ABILITY ++ "Single Enemy Hit" ++
+            COLOR_HERO ++ "\nAbility 2: " ++ COLOR_ABILITY ++ "Team Enemy Hits" ++
+            COLOR_HERO ++ "\nAbility 3: " ++ COLOR_ABILITY ++ "Aim Sights" ++
+            COLOR_HERO ++ "\nEnter which ability you'd like to have the archer use: " ++ ANSI_RESET);
+
         switch (abilityChoice) {
             '1' => {
                 const enemyChoice = try getCharInput(COLOR_HERO ++ "\nEnter which enemy you'd like to attack [1. Front] [2. Middle] [3. Rear]: " ++ ANSI_RESET);
@@ -194,10 +220,12 @@ pub fn handleArcherInput(archer: ?*const PlayerHandle, enemyTeam: *const [3]?*co
                     else => continue,
                 };
 
-                const enemyHandle = EntityHandle{ .enemy = enemyChar };
+                const enemyHandle = EntityHandle{ .enemy = enemyChar }; // Stores enemy entities handle
+                const currDmg = getPlayerDamage(@constCast(archer)); // Gets archers current damage stat
+                const currHealth = getEnemyHealth(@constCast(enemyChar)); // Gets enemy's current health stat
 
                 // Applies archer entities' damage to the health of the chosen grunt
-                try updateHealth(enemyHandle, getPlayerDamage(@constCast(archer)), getEnemyHealth(@constCast(enemyChar)), null, calcDamage, setEnemyHealth);
+                try updateHealth(enemyHandle, currDmg, currHealth, null, calcDamage, setEnemyHealth);
 
                 // Enemy takes average damage on hit
                 try stdout.print(COLOR_DAMAGE ++ "\nEnemy {c} has been hit!" ++ ANSI_RESET, .{enemyChoice});
@@ -207,8 +235,11 @@ pub fn handleArcherInput(archer: ?*const PlayerHandle, enemyTeam: *const [3]?*co
             '2' => {
                 // Less than average damage is applied to the every enemy
                 for (enemyTeam) |enemy| {
-                    const enemyHandle = EntityHandle{ .enemy = enemy };
-                    try updateHealth(enemyHandle, @divFloor(getPlayerDamage(@constCast(archer)), 2), getEnemyHealth(@constCast(enemy)), null, calcDamage, setEnemyHealth);
+                    const enemyHandle = EntityHandle{ .enemy = enemy }; // Stores enemy entities handle
+                    const currDmg = @divFloor(getPlayerDamage(@constCast(archer)), 2); // Gets archers current damage stat int divided by 2 rounded down
+                    const currHealth = getEnemyHealth(@constCast(enemy)); // Gets enemy's current health stat
+
+                    try updateHealth(enemyHandle, currDmg, currHealth, null, calcDamage, setEnemyHealth);
                 }
 
                 try stdout.print(COLOR_DAMAGE ++ "\nThe enemy party has been hit!" ++ ANSI_RESET, .{});
@@ -216,8 +247,9 @@ pub fn handleArcherInput(archer: ?*const PlayerHandle, enemyTeam: *const [3]?*co
                 break;
             },
             '3' => {
-                // The archer should be unable to attack for a single turn
-                // On next available aciton, the archer will apply double damage
+                // For 1 Turn, the archer's damage is tripled
+                const currDmg = getPlayerDamage(@constCast(archer)); // Gets archers current damage stat
+                try applyBuff(&buffs, archerHandle, .Damage, currDmg, 3, 3, 1, mult, divide, setPlayerDamage);
                 try stdout.print(COLOR_BUFF ++ "\nThe archer takes aim!" ++ ANSI_RESET, .{});
                 try stdout.flush();
                 break;
@@ -230,12 +262,12 @@ pub fn handleArcherInput(archer: ?*const PlayerHandle, enemyTeam: *const [3]?*co
     }
 }
 
-pub fn handlePriestInput(priest: ?*const PlayerHandle, playerTeam: *const [3]?*const PlayerHandle) !void {
-    const abilityChoice = try getCharInput(COLOR_HERO ++ "\nAbility 1: " ++ COLOR_ABILITY ++ "Single Team Member Heal" ++
-        COLOR_HERO ++ "\nAbility 2: " ++ COLOR_ABILITY ++ "Buff Team" ++
-        COLOR_HERO ++ "\nEnter which ability you'd like to have the priest use: " ++ ANSI_RESET);
-
+pub fn handlePriestInput(priest: ?*const PlayerHandle, playerTeam: *const [3]?*const PlayerHandle, buffs: *ArrayList(ActiveBuff)) !void {
     while (true) {
+        const abilityChoice = try getCharInput(COLOR_HERO ++ "\nAbility 1: " ++ COLOR_ABILITY ++ "Single Team Member Heal" ++
+            COLOR_HERO ++ "\nAbility 2: " ++ COLOR_ABILITY ++ "Buff Team" ++
+            COLOR_HERO ++ "\nEnter which ability you'd like to have the priest use: " ++ ANSI_RESET);
+
         switch (abilityChoice) {
             '1' => {
                 const teamChoice = try getCharInput(COLOR_HERO ++ "\nEnter which team member you'd like to healed [1. Tank] [2. Archer] [3. Priest]: " ++ ANSI_RESET);
@@ -249,7 +281,12 @@ pub fn handlePriestInput(priest: ?*const PlayerHandle, playerTeam: *const [3]?*c
 
                 const playerHandle = EntityHandle{ .player = teamChar };
 
-                try updateHealth(playerHandle, getPlayerDamage(@constCast(priest)), getPlayerHealth(@constCast(teamChar)), getPlayerMaxHealth(@constCast(teamChar)), calcHeal, setPlayerHealth);
+                // Uses Priest damage as healing integer
+                const currHealing = getPlayerDamage(@constCast(priest));
+                const currHealth = getPlayerHealth(@constCast(teamChar));
+                const currMaxHealth = getPlayerMaxHealth(@constCast(teamChar));
+
+                try updateHealth(playerHandle, currHealing, currHealth, currMaxHealth, calcHeal, setPlayerHealth);
 
                 // Heal team member by average amount
                 try stdout.print(COLOR_HEAL ++ "\nTeam member {c} has been healed!" ++ ANSI_RESET, .{teamChoice});
@@ -257,7 +294,22 @@ pub fn handlePriestInput(priest: ?*const PlayerHandle, playerTeam: *const [3]?*c
                 break;
             },
             '2' => {
-                // Every living team member gains some resitance and/or health regen for a set amount of turns
+                // Every team member has all stats increased
+                for (playerTeam) |player| {
+                    const playerHandle = EntityHandle{ .player = player };
+
+                    const currDef = getPlayerDefense(@constCast(player));
+                    const currMaxHealth = getPlayerMaxHealth(@constCast(player));
+                    const currDmg = getPlayerDamage(@constCast(player));
+
+                    // Adds 25 Defense to every team member
+                    try applyBuff(&buffs, playerHandle, .Defense, currDef, 25, 25, 2, add, subtract, setPlayerDefense);
+                    // Adds 25 Max Health to every team member
+                    try applyBuff(&buffs, playerHandle, .MaxHealth, currMaxHealth, 25, 25, 4, add, subtract, setPlayerMaxHealth);
+                    // Adds 15 Damage to every team member
+                    try applyBuff(&buffs, playerHandle, .Damage, currDmg, 15, 15, 3, add, subtract, setPlayerDamage);
+                }
+
                 try stdout.print(COLOR_BUFF ++ "The team thrives!" ++ ANSI_RESET, .{});
                 try stdout.flush();
                 break;
@@ -283,8 +335,8 @@ fn calcHeal(heal: i32, health: i32, maxHealth: ?i32) i32 {
 }
 
 // Applies damage or healing effect based on given functions
-fn updateHealth(handle: EntityHandle, damage: i32, health: i32, maxHealth: ?i32, calcVal: fn (i32, i32, ?i32) i32, setHealth: fn (?*anyopaque, i32) callconv(.c) void) !void {
-    const result = calcVal(damage, health, maxHealth);
+fn updateHealth(handle: EntityHandle, damage: i32, health: i32, maxHealth: ?i32, calcFn: fn (i32, i32, ?i32) i32, setHealth: fn (?*anyopaque, i32) callconv(.c) void) !void {
+    const result = calcFn(damage, health, maxHealth);
 
     switch (handle) {
         .enemy => |e_ptr| {
@@ -293,6 +345,7 @@ fn updateHealth(handle: EntityHandle, damage: i32, health: i32, maxHealth: ?i32,
         .player => |p_ptr| {
             setHealth(@constCast(p_ptr), result);
         },
+        else => {},
     }
 }
 
@@ -315,15 +368,76 @@ fn divide(currVal: i32, modVal: i32) i32 {
 }
 
 // Updates character stats based on given buffs or items
-fn updateStat(handle: EntityHandle, currVal: i32, modVal: i32, calcVal: fn (i32, i32) i32, setVal: fn (?*anyopaque, i32) callconv(.c) void) !void {
-    const result = calcVal(currVal, modVal);
+fn updateStat(handle: EntityHandle, currVal: i32, modVal: i32, calcFn: fn (i32, i32) i32, setFn: fn (?*anyopaque, i32) callconv(.c) void) !void {
+    const result = calcFn(currVal, modVal);
 
     switch (handle) {
         .enemy => |e_ptr| {
-            setVal(@constCast(e_ptr), result);
+            setFn(@constCast(e_ptr), result);
         },
         .player => |p_ptr| {
-            setVal(@constCast(p_ptr), result);
+            setFn(@constCast(p_ptr), result);
         },
+        else => {},
+    }
+}
+
+fn applyBuff(buffs: *ArrayList(ActiveBuff), handle: EntityHandle, stat: StatType, currVal: i32, modVal: i32, revertVal: i32, duration: i32, calcFn: fn (i32, i32) i32, revertFn: fn (i32, i32) i32, setFn: fn (?*anyopaque, i32) callconv(.c) void) !void {
+    updateStat(handle, currVal, modVal, calcFn, setFn);
+
+    try buffs.append(ActiveBuff{ .handle = handle, .stat = stat, .revertVal = revertVal, .duration = duration, .revertFn = revertFn, .setFn = setFn });
+}
+
+pub fn tickBuffs(buffs: *ArrayList(ActiveBuff)) !void {
+    for (buffs) |buff| {
+        if (buff.duration <= 0) {
+            // const handle = switch (buff.handle) {
+            //     .enemy => buff.handle.enemy,
+            //     .player => buff.handle.player,
+            // };
+
+            switch (buff.stat) {
+                .Defense => {
+                    switch (buff.handle) {
+                        .enemy => {
+                            const currVal = getEnemyDefense(@constCast(buff.handle.enemy));
+                            try updateStat(buff.handle, currVal, buff.revertVal, buff.revertFn, buff.setFn);
+                        },
+                        .player => {
+                            const currVal = getPlayerDefense(@constCast(buff.handle.player));
+                            try updateStat(buff.handle, currVal, buff.revertVal, buff.revertFn, buff.setFn);
+                        },
+                    }
+                },
+                .Damage => {
+                    switch (buff.handle) {
+                        .enemy => {
+                            const currVal = getEnemyDamage(@constCast(buff.handle.enemy));
+                            try updateStat(buff.handle, currVal, buff.revertVal, buff.revertFn, buff.setFn);
+                        },
+                        .player => {
+                            const currVal = getPlayerDamage(@constCast(buff.handle.player));
+                            try updateStat(buff.handle, currVal, buff.revertVal, buff.revertFn, buff.setFn);
+                        },
+                    }
+                },
+                .MaxHealth => {
+                    switch (buff.handle) {
+                        .enemy => {
+                            const currVal = getEnemyMaxHealth(@constCast(buff.handle.enemy));
+                            try updateStat(buff.handle, currVal, buff.revertVal, buff.revertFn, buff.setFn);
+                        },
+                        .player => {
+                            const currVal = getPlayerMaxHealth(@constCast(buff.handle.player));
+                            try updateStat(buff.handle, currVal, buff.revertVal, buff.revertFn, buff.setFn);
+                        },
+                    }
+                },
+                else => {},
+            }
+            try stdout.print("\nA buff has expired!", .{});
+            _ = buffs.swapRemove(buff);
+        }
+        buff.duration -= 1;
     }
 }

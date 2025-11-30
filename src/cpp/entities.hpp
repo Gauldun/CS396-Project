@@ -4,61 +4,64 @@
 class PlayerEntity {
 private:
   // Basic Variables
-  int health{}, maxHealth{}, damage{};
-  bool hasTurn{};
+  int health{}, maxHealth{}, damage{}, defense{};
 
 public:
   // Constructor
-  PlayerEntity(int hVal = 5, int dVal = 5, bool hasTurn = true);
+  PlayerEntity(int hVal = 100, int dVal = 20, int defVal = 15);
   int equipItem(int modifiedVal, int newItemMod, int oldItemMod);
 
   // Getters
   int getHealth();
   int getMaxHealth();
   int getDamage();
-  bool getTurn();
+  int getDefense();
 
   // Setters
   void setHealth(int newHealth);
   void setMaxHealth(int newMaxHealth);
   void setDamage(int newDamage);
-  void setTurn(bool newTurn);
+  void setDefense(int newDefense);
 };
 
 class EnemyEntity {
 private:
-  int health{}, maxHealth{}, damage{};
-  bool hasTurn{};
+  int health{}, maxHealth{}, damage{}, defense{};
 
 public:
-  EnemyEntity(int hVal = 3, int dVal = 3, bool hasTurn = true);
+  EnemyEntity(int hVal = 200, int dVal = 15, int defVal = 5);
 
   // Getters
   int getHealth();
   int getMaxHealth();
   int getDamage();
-  bool getTurn();
+  int getDefense();
 
   // Setters
   void setHealth(int newHealth);
   void setMaxHealth(int newMaxHealth);
   void setDamage(int newDamage);
-  void setTurn(bool newTurn);
+  void setDefense(int newDefense);
 };
 
 class Item {
 private:
-  bool doesDamage{}, hasSupport{}, hasEffect{};
-  int duration{};
+  int damage{}, health{}, defense{}, selfDamage{};
 
 public:
-  Item(bool dmgBool = false, bool suppBool = false, bool effectBool = false,
-       int durVal = 1);
+  Item(int dVal = 0, int hVal = 0, int defVal = 0, int sDVal = 0);
 
   // Getters
-  int getDuration();
+  int getDamage();
+  int getHealth();
+  int getDefense();
+  int getSelfDamage();
 
   // Setters
-  void setDuration(int newDur);
+  // Probably useless but just in case
+  void setDamage(int newDamage);
+  void setHealth(int newHealth);
+  void setDefense(int newDefense);
+  void setSelfDamage(int newSelfDamage);
 };
 #endif // ENTITIES_H

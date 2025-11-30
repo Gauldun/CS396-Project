@@ -8,22 +8,23 @@
 #define TO_ITEM(handle) reinterpret_cast<Item *>(handle)
 
 // Constructors
-PlayerEntityHandle *PlayerEntityCreate(int32_t hVal, int32_t dVal, bool tVal) {
+PlayerEntityHandle *PlayerEntityCreate(int32_t hVal, int32_t dVal,
+                                       int32_t defVal) {
   // Allocate the C++ object on the heap and cast its pointer to the opaque
   // handle
   return reinterpret_cast<PlayerEntityHandle *>(
-      new PlayerEntity(hVal, dVal, tVal));
+      new PlayerEntity(hVal, dVal, defVal));
 }
 
-EnemyEntityHandle *EnemyEntityCreate(int32_t hVal, int32_t dVal, bool tVal) {
+EnemyEntityHandle *EnemyEntityCreate(int32_t hVal, int32_t dVal,
+                                     int32_t defVal) {
   return reinterpret_cast<EnemyEntityHandle *>(
-      new EnemyEntity(hVal, dVal, tVal));
+      new EnemyEntity(hVal, dVal, defVal));
 }
 
-ItemHandle *ItemHandleCreate(bool dmgBool, bool suppBool, bool effectBool,
-                             int32_t durVal) {
-  return reinterpret_cast<ItemHandle *>(
-      new Item(dmgBool, suppBool, effectBool, durVal));
+ItemHandle *ItemHandleCreate(int32_t dVal, int32_t hVal, int32_t defVal,
+                             int32_t sDVal) {
+  return reinterpret_cast<ItemHandle *>(new Item(dVal, hVal, defVal, sDVal));
 }
 
 // Destructors
@@ -64,10 +65,10 @@ int32_t PlayerEntityGetDamage(PlayerEntityHandle *handle) {
   return TO_PLAYER_ENTITY(handle)->getDamage();
 }
 
-int32_t PlayerEntityGetTurn(PlayerEntityHandle *handle) {
+int32_t PlayerEntityGetDefense(PlayerEntityHandle *handle) {
   if (!handle)
     return 0;
-  return TO_PLAYER_ENTITY(handle)->getTurn();
+  return TO_PLAYER_ENTITY(handle)->getDefense();
 }
 
 // EnemyEntity Getters
@@ -89,17 +90,35 @@ int32_t EnemyEntityGetDamage(EnemyEntityHandle *handle) {
   return TO_ENEMY_ENTITY(handle)->getDamage();
 }
 
-int32_t EnemyEntityGetTurn(EnemyEntityHandle *handle) {
+int32_t EnemyEntityGetDefense(EnemyEntityHandle *handle) {
   if (!handle)
     return 0;
-  return TO_ENEMY_ENTITY(handle)->getTurn();
+  return TO_ENEMY_ENTITY(handle)->getDefense();
 }
 
 // Item Getters
-int32_t ItemGetDuration(ItemHandle *handle) {
+int32_t ItemGetDamage(ItemHandle *handle) {
   if (!handle)
     return 0;
-  return TO_ITEM(handle)->getDuration();
+  return TO_ITEM(handle)->getDamage();
+}
+
+int32_t ItemGetHealth(ItemHandle *handle) {
+  if (!handle)
+    return 0;
+  return TO_ITEM(handle)->getHealth();
+}
+
+int32_t ItemGetDefense(ItemHandle *handle) {
+  if (!handle)
+    return 0;
+  return TO_ITEM(handle)->getDefense();
+}
+
+int32_t ItemGetSelfDamage(ItemHandle *handle) {
+  if (!handle)
+    return 0;
+  return TO_ITEM(handle)->getSelfDamage();
 }
 
 // PlayerEntity Setters
@@ -122,10 +141,10 @@ void PlayerEntitySetDamage(PlayerEntityHandle *handle, int32_t newDamage) {
   TO_PLAYER_ENTITY(handle)->setDamage(newDamage);
 }
 
-void PlayerEntitySetTurn(PlayerEntityHandle *handle, bool newTurn) {
+void PlayerEntitySetDefense(PlayerEntityHandle *handle, int32_t newDefense) {
   if (!handle)
     return;
-  TO_PLAYER_ENTITY(handle)->setTurn(newTurn);
+  TO_PLAYER_ENTITY(handle)->setDefense(newDefense);
 }
 
 // EnemyEntity Setters
@@ -147,15 +166,33 @@ void EnemyEntitySetDamage(EnemyEntityHandle *handle, int32_t newDamage) {
   TO_ENEMY_ENTITY(handle)->setDamage(newDamage);
 }
 
-void EnemyEntitySetTurn(EnemyEntityHandle *handle, bool newTurn) {
+void EnemyEntitySetDefense(EnemyEntityHandle *handle, int32_t newDefense) {
   if (!handle)
     return;
-  TO_ENEMY_ENTITY(handle)->setTurn(newTurn);
+  TO_ENEMY_ENTITY(handle)->setDefense(newDefense);
 }
 
 // Item Setters
-void ItemSetDuration(ItemHandle *handle, int32_t newDur) {
+void ItemSetDamage(ItemHandle *handle, int32_t newDamage) {
   if (!handle)
     return;
-  TO_ITEM(handle)->setDuration(newDur);
+  TO_ITEM(handle)->setDamage(newDamage);
+}
+
+void ItemSetHealth(ItemHandle *handle, int32_t newHealth) {
+  if (!handle)
+    return;
+  TO_ITEM(handle)->setHealth(newHealth);
+}
+
+void ItemSetDefense(ItemHandle *handle, int32_t newDefense) {
+  if (!handle)
+    return;
+  TO_ITEM(handle)->setDefense(newDefense);
+}
+
+void ItemSetSelfDamage(ItemHandle *handle, int32_t newSelfDamage) {
+  if (!handle)
+    return;
+  TO_ITEM(handle)->setSelfDamage(newSelfDamage);
 }
