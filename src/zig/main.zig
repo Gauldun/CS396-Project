@@ -9,7 +9,7 @@ const cpp = @cImport({
 const stdout = sys.stdout;
 
 // For dynamic array declaration
-const ArrayList = std.ArrayList;
+const arrayList = std.array_list.Managed;
 
 // Player Character cpp function const calls
 const createPlayerChar = cpp.PlayerEntityCreate;
@@ -26,7 +26,7 @@ pub fn main() !void {
     const allocator = gpa.allocator();
 
     // Stores all active buffs
-    var activeBuffs = std.ArrayList(sys.ActiveBuff).init(allocator);
+    var activeBuffs = arrayList(sys.ActiveBuff).init(allocator);
     defer activeBuffs.deinit();
 
     // Tank Player Party Character w/ Base Stats; 100 Health, 15 Damage, 25% Defense

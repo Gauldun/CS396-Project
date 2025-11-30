@@ -18,7 +18,7 @@ var stdinReader = std.fs.File.stdin().reader(&stdinBuffer);
 pub const stdin = &stdinReader.interface;
 
 // Array declaration variable
-pub const ArrayList = std.ArrayList;
+pub const arrayList = std.array_list.Managed;
 
 // Player Entity Getters
 const getPlayerHealth = cpp.PlayerEntityGetHealth;
@@ -143,7 +143,7 @@ pub fn displayStats(playerTeam: *const [3]?*const PlayerHandle, enemyTeam: *cons
         COLOR_ENEMY ++ "\nEnemy Rear Health: " ++ COLOR_HEAL ++ "{d}\n" ++ ANSI_RESET, .{ getPlayerHealth(@constCast(tank)), getPlayerHealth(@constCast(archer)), getPlayerHealth(@constCast(priest)), getEnemyHealth(@constCast(enemyFront)), getEnemyHealth(@constCast(enemyMiddle)), getEnemyHealth(@constCast(enemyRear)) });
 }
 
-pub fn handleTankInput(tank: ?*const PlayerHandle, enemyTeam: *const [3]?*const EnemyHandle, buffs: *ArrayList(ActiveBuff)) !void {
+pub fn handleTankInput(tank: ?*const PlayerHandle, enemyTeam: *const [3]?*const EnemyHandle, buffs: *arrayList(ActiveBuff)) !void {
     const tankHandle = EntityHandle{ .player = tank };
     while (true) {
         const abilityChoice = try getCharInput(COLOR_HERO ++ "\nAbility 1: " ++ COLOR_ABILITY ++ "Single Enemy Hit" ++
@@ -201,7 +201,7 @@ pub fn handleTankInput(tank: ?*const PlayerHandle, enemyTeam: *const [3]?*const 
     }
 }
 
-pub fn handleArcherInput(archer: ?*const PlayerHandle, enemyTeam: *const [3]?*const EnemyHandle, buffs: *ArrayList(ActiveBuff)) !void {
+pub fn handleArcherInput(archer: ?*const PlayerHandle, enemyTeam: *const [3]?*const EnemyHandle, buffs: *arrayList(ActiveBuff)) !void {
     const archerHandle = EntityHandle{ .player = archer };
     while (true) {
         const abilityChoice = try getCharInput(COLOR_HERO ++ "\nAbility 1: " ++ COLOR_ABILITY ++ "Single Enemy Hit" ++
@@ -262,7 +262,7 @@ pub fn handleArcherInput(archer: ?*const PlayerHandle, enemyTeam: *const [3]?*co
     }
 }
 
-pub fn handlePriestInput(priest: ?*const PlayerHandle, playerTeam: *const [3]?*const PlayerHandle, buffs: *ArrayList(ActiveBuff)) !void {
+pub fn handlePriestInput(priest: ?*const PlayerHandle, playerTeam: *const [3]?*const PlayerHandle, buffs: *arrayList(ActiveBuff)) !void {
     while (true) {
         const abilityChoice = try getCharInput(COLOR_HERO ++ "\nAbility 1: " ++ COLOR_ABILITY ++ "Single Team Member Heal" ++
             COLOR_HERO ++ "\nAbility 2: " ++ COLOR_ABILITY ++ "Buff Team" ++
@@ -382,13 +382,13 @@ fn updateStat(handle: EntityHandle, currVal: i32, modVal: i32, calcFn: fn (i32, 
     }
 }
 
-fn applyBuff(buffs: *ArrayList(ActiveBuff), handle: EntityHandle, stat: StatType, currVal: i32, modVal: i32, revertVal: i32, duration: i32, calcFn: fn (i32, i32) i32, revertFn: fn (i32, i32) i32, setFn: fn (?*anyopaque, i32) callconv(.c) void) !void {
+fn applyBuff(buffs: *arrayList(ActiveBuff), handle: EntityHandle, stat: StatType, currVal: i32, modVal: i32, revertVal: i32, duration: i32, calcFn: fn (i32, i32) i32, revertFn: fn (i32, i32) i32, setFn: fn (?*anyopaque, i32) callconv(.c) void) !void {
     updateStat(handle, currVal, modVal, calcFn, setFn);
 
     try buffs.append(ActiveBuff{ .handle = handle, .stat = stat, .revertVal = revertVal, .duration = duration, .revertFn = revertFn, .setFn = setFn });
 }
 
-pub fn tickBuffs(buffs: *ArrayList(ActiveBuff)) !void {
+pub fn tickBuffs(buffs: *arrayList(ActiveBuff)) !void {
     for (buffs) |buff| {
         if (buff.duration <= 0) {
             // const handle = switch (buff.handle) {
