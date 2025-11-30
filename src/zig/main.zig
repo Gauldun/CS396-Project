@@ -61,28 +61,47 @@ pub fn main() !void {
         grunt3,
     };
 
+    // Random Number Gen
+    const rand = std.crypto.random;
+
     while (true) {
-        while (true) {
-            const charChoice = try sys.getCharInput(sys.COLOR_HERO ++ "\nEnter which character you'd like to have act [1. Tank] [2. Archer] [3. Priest]: " ++ sys.ANSI_RESET);
-            switch (charChoice) {
-                '1' => {
+        // Randomizes turn order for all players and enemies
+        var turnOrder = [_]usize{ 1, 2, 3, 4, 5, 6 };
+        rand.shuffle(usize, &turnOrder);
+
+        for (turnOrder) |charIndex| {
+            switch (charIndex) {
+                1 => {
                     try sys.handleTankInput(tankChar, &enemyTeam, &activeBuffs);
-                    break;
                 },
-                '2' => {
+                2 => {
                     try sys.handleArcherInput(archerChar, &enemyTeam, &activeBuffs);
-                    break;
                 },
-                '3' => {
+                3 => {
                     try sys.handlePriestInput(priestChar, &playerTeam, &activeBuffs);
-                    break;
                 },
-                else => {
-                    try stdout.print(sys.COLOR_ERROR ++ "Invalid Input. Please try again!" ++ sys.ANSI_RESET, .{});
-                    try stdout.flush();
+                4 => {
+                    const randAbility = rand.uintLessThan(usize, 2) + 1;
+                    const randChar = rand.uintLessThan(usize, 3);
+                    try sys.handleGruntTurn(grunt1, &playerTeam, &activeBuffs, randAbility, randChar);
+                    continue;
                 },
+                5 => {
+                    const randAbility = rand.uintLessThan(usize, 2) + 1;
+                    const randChar = rand.uintLessThan(usize, 3);
+                    try sys.handleGruntTurn(grunt2, &playerTeam, &activeBuffs, randAbility, randChar);
+                    continue;
+                },
+                6 => {
+                    const randAbility = rand.uintLessThan(usize, 2) + 1;
+                    const randChar = rand.uintLessThan(usize, 3);
+                    try sys.handleGruntTurn(grunt3, &playerTeam, &activeBuffs, randAbility, randChar);
+                    continue;
+                },
+                else => unreachable,
             }
-        } // End Player Character Handling Loop
+        }
+        // End Player Character Handling Loop
         try sys.tickBuffs(&activeBuffs);
         try sys.displayStats(&playerTeam, &enemyTeam);
     } // End of Game Loop

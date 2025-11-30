@@ -322,6 +322,30 @@ pub fn handlePriestInput(priest: ?*const PlayerHandle, playerTeam: *const [3]?*c
     }
 }
 
+pub fn handleGruntTurn(grunt: ?*const EnemyHandle, playerTeam: *const [3]?*const PlayerHandle, buffs: *arrayList(ActiveBuff), randAbility: usize, randChar: usize) !void {
+    const playerMember = playerTeam[randChar];
+    const playerHandle = EntityHandle{ .player = playerMember };
+    switch (randAbility) {
+        // Attack Random Player Character
+        1 => {
+            const currDmg = getEnemyDamage(@constCast(grunt));
+            const currHealth = getPlayerHealth(@constCast(playerMember));
+            try updateHealth(playerHandle, currDmg, currHealth, null, calcDamage, setPlayerHealth);
+        },
+        // Fear Random Player Character
+        // Debuffs Player with less defense and less damage output
+        2 => {
+            const currDef = getPlayerDefense(@constCast(playerMember));
+            const currDmg = getPlayerDamage(@constCast(playerMember));
+
+            // Subtracts Player defense by 10 and Player damage by 5 for 1 turn
+            try applyBuff(buffs, playerHandle, .Defense, currDef, 10, 10, 1, subtract, add, setPlayerDefense);
+            try applyBuff(buffs, playerHandle, .Damage, currDmg, 5, 5, 1, subtract, add, setPlayerDamage);
+        },
+        else => unreachable,
+    }
+}
+
 // Functional: Returns new health value after character takes damage
 fn calcDamage(damage: i32, health: i32, _: ?i32) i32 {
     const result = if ((health - damage) <= 0) 0 else health - damage;
@@ -432,7 +456,7 @@ pub fn tickBuffs(buffs: *arrayList(ActiveBuff)) !void {
                     }
                 },
             }
-            try stdout.print("\nA buff has expired!", .{});
+            try stdout.print(COLOR_DEBUFF ++ "\nA buff has expired!" ++ ANSI_RESET, .{});
             _ = buffs.swapRemove(i);
         } else {
             buff.duration -= 1;
