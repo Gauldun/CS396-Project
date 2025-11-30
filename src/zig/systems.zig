@@ -70,7 +70,7 @@ const EntityHandle = union(enum) {
 const StatType = enum { Damage, Defense, MaxHealth };
 
 //Used for reverting active buffs
-pub const ActiveBuff = struct { handle: EntityHandle, stat: StatType, revertVal: i32, duration: i32, revertFn: fn (i32, i32) i32, setFn: fn (?*anyopaque, i32) callconv(.c) void };
+pub const ActiveBuff = struct { handle: EntityHandle, stat: StatType, revertVal: i32, duration: i32, revertFn: *const fn (i32, i32) i32, setFn: *const fn (?*anyopaque, i32) callconv(.c) void };
 
 // Colors codes
 const ANSI_ESC = "\u{1b}";
@@ -178,7 +178,7 @@ pub fn handleTankInput(tank: ?*const PlayerHandle, enemyTeam: *const [3]?*const 
                 // The tank has increased damage resist for 2 turns and taunts enemy team for 3 turns
                 const currDef = getPlayerDefense(@constCast(tank)); // Gets Tanks current defense stat
                 // Doubles current defense stat for 2 turns
-                try applyBuff(&buffs, tankHandle, .Defense, currDef, 2, 2, 2, mult, divide, setPlayerDefense);
+                try applyBuff(buffs, tankHandle, .Defense, currDef, 2, 2, 2, mult, divide, setPlayerDefense);
 
                 try stdout.print(COLOR_BUFF ++ "\nThe tanks defenses have been bolstered! " ++ COLOR_DEBUFF ++ "But, the enemy party has taken notice of the tanks presence!" ++ ANSI_RESET, .{});
                 try stdout.flush();
@@ -188,7 +188,7 @@ pub fn handleTankInput(tank: ?*const PlayerHandle, enemyTeam: *const [3]?*const 
                 // The tank has increased damage and taunts enemy team
                 const currDmg = getPlayerDamage(@constCast(tank)); // Gets Tanks current damage stat
                 // Triples current damage stat for 2 turns
-                try applyBuff(&buffs, tankHandle, .Damage, currDmg, 3, 3, 2, mult, divide, setPlayerDamage);
+                try applyBuff(buffs, tankHandle, .Damage, currDmg, 3, 3, 2, mult, divide, setPlayerDamage);
                 try stdout.print(COLOR_BUFF ++ "\nThe tanks weapons have been emboldened! " ++ COLOR_DEBUFF ++ "But, the enemy party has taken notice of the tanks presence!" ++ ANSI_RESET, .{});
                 try stdout.flush();
                 break;
@@ -249,7 +249,7 @@ pub fn handleArcherInput(archer: ?*const PlayerHandle, enemyTeam: *const [3]?*co
             '3' => {
                 // For 1 Turn, the archer's damage is tripled
                 const currDmg = getPlayerDamage(@constCast(archer)); // Gets archers current damage stat
-                try applyBuff(&buffs, archerHandle, .Damage, currDmg, 3, 3, 1, mult, divide, setPlayerDamage);
+                try applyBuff(buffs, archerHandle, .Damage, currDmg, 3, 3, 1, mult, divide, setPlayerDamage);
                 try stdout.print(COLOR_BUFF ++ "\nThe archer takes aim!" ++ ANSI_RESET, .{});
                 try stdout.flush();
                 break;
@@ -303,11 +303,11 @@ pub fn handlePriestInput(priest: ?*const PlayerHandle, playerTeam: *const [3]?*c
                     const currDmg = getPlayerDamage(@constCast(player));
 
                     // Adds 25 Defense to every team member
-                    try applyBuff(&buffs, playerHandle, .Defense, currDef, 25, 25, 2, add, subtract, setPlayerDefense);
+                    try applyBuff(buffs, playerHandle, .Defense, currDef, 25, 25, 2, add, subtract, setPlayerDefense);
                     // Adds 25 Max Health to every team member
-                    try applyBuff(&buffs, playerHandle, .MaxHealth, currMaxHealth, 25, 25, 4, add, subtract, setPlayerMaxHealth);
+                    try applyBuff(buffs, playerHandle, .MaxHealth, currMaxHealth, 25, 25, 4, add, subtract, setPlayerMaxHealth);
                     // Adds 15 Damage to every team member
-                    try applyBuff(&buffs, playerHandle, .Damage, currDmg, 15, 15, 3, add, subtract, setPlayerDamage);
+                    try applyBuff(buffs, playerHandle, .Damage, currDmg, 15, 15, 3, add, subtract, setPlayerDamage);
                 }
 
                 try stdout.print(COLOR_BUFF ++ "The team thrives!" ++ ANSI_RESET, .{});
@@ -335,7 +335,7 @@ fn calcHeal(heal: i32, health: i32, maxHealth: ?i32) i32 {
 }
 
 // Applies damage or healing effect based on given functions
-fn updateHealth(handle: EntityHandle, damage: i32, health: i32, maxHealth: ?i32, calcFn: fn (i32, i32, ?i32) i32, setHealth: fn (?*anyopaque, i32) callconv(.c) void) !void {
+fn updateHealth(handle: EntityHandle, damage: i32, health: i32, maxHealth: ?i32, calcFn: *const fn (i32, i32, ?i32) i32, setHealth: *const fn (?*anyopaque, i32) callconv(.c) void) !void {
     const result = calcFn(damage, health, maxHealth);
 
     switch (handle) {
@@ -345,7 +345,6 @@ fn updateHealth(handle: EntityHandle, damage: i32, health: i32, maxHealth: ?i32,
         .player => |p_ptr| {
             setHealth(@constCast(p_ptr), result);
         },
-        else => {},
     }
 }
 
@@ -364,11 +363,11 @@ fn mult(currVal: i32, modVal: i32) i32 {
 }
 
 fn divide(currVal: i32, modVal: i32) i32 {
-    return currVal / modVal;
+    return @divFloor(currVal, modVal);
 }
 
 // Updates character stats based on given buffs or items
-fn updateStat(handle: EntityHandle, currVal: i32, modVal: i32, calcFn: fn (i32, i32) i32, setFn: fn (?*anyopaque, i32) callconv(.c) void) !void {
+fn updateStat(handle: EntityHandle, currVal: i32, modVal: i32, calcFn: *const fn (i32, i32) i32, setFn: *const fn (?*anyopaque, i32) callconv(.c) void) !void {
     const result = calcFn(currVal, modVal);
 
     switch (handle) {
@@ -378,24 +377,23 @@ fn updateStat(handle: EntityHandle, currVal: i32, modVal: i32, calcFn: fn (i32, 
         .player => |p_ptr| {
             setFn(@constCast(p_ptr), result);
         },
-        else => {},
     }
 }
 
-fn applyBuff(buffs: *arrayList(ActiveBuff), handle: EntityHandle, stat: StatType, currVal: i32, modVal: i32, revertVal: i32, duration: i32, calcFn: fn (i32, i32) i32, revertFn: fn (i32, i32) i32, setFn: fn (?*anyopaque, i32) callconv(.c) void) !void {
-    updateStat(handle, currVal, modVal, calcFn, setFn);
+fn applyBuff(buffs: *arrayList(ActiveBuff), handle: EntityHandle, stat: StatType, currVal: i32, modVal: i32, revertVal: i32, duration: i32, calcFn: *const fn (i32, i32) i32, revertFn: *const fn (i32, i32) i32, setFn: *const fn (?*anyopaque, i32) callconv(.c) void) !void {
+    try updateStat(handle, currVal, modVal, calcFn, setFn);
 
     try buffs.append(ActiveBuff{ .handle = handle, .stat = stat, .revertVal = revertVal, .duration = duration, .revertFn = revertFn, .setFn = setFn });
 }
 
 pub fn tickBuffs(buffs: *arrayList(ActiveBuff)) !void {
-    for (buffs) |buff| {
-        if (buff.duration <= 0) {
-            // const handle = switch (buff.handle) {
-            //     .enemy => buff.handle.enemy,
-            //     .player => buff.handle.player,
-            // };
+    var i: usize = 0;
+    // Iterate using an index so we can handle removal safely
+    while (i < buffs.items.len) {
+        // Get a pointer to the current buff so we can modify duration
+        const buff = &buffs.items[i];
 
+        if (buff.duration <= 0) {
             switch (buff.stat) {
                 .Defense => {
                     switch (buff.handle) {
@@ -433,11 +431,12 @@ pub fn tickBuffs(buffs: *arrayList(ActiveBuff)) !void {
                         },
                     }
                 },
-                else => {},
             }
             try stdout.print("\nA buff has expired!", .{});
-            _ = buffs.swapRemove(buff);
+            _ = buffs.swapRemove(i);
+        } else {
+            buff.duration -= 1;
+            i += 1;
         }
-        buff.duration -= 1;
     }
 }
