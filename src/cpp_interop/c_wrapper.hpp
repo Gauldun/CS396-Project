@@ -35,6 +35,7 @@ int32_t PlayerEntityGetHealth(PlayerEntityHandle *handle);
 int32_t PlayerEntityGetMaxHealth(PlayerEntityHandle *handle);
 int32_t PlayerEntityGetDamage(PlayerEntityHandle *handle);
 int32_t PlayerEntityGetDefense(PlayerEntityHandle *handle);
+int32_t PlayerEntityGetAggro(PlayerEntityHandle *handle);
 
 // EnemyEntity Getters
 int32_t EnemyEntityGetHealth(EnemyEntityHandle *handle);
@@ -53,6 +54,7 @@ void PlayerEntitySetHealth(PlayerEntityHandle *handle, int32_t newHealth);
 void PlayerEntitySetMaxHealth(PlayerEntityHandle *handle, int32_t newMaxHealth);
 void PlayerEntitySetDamage(PlayerEntityHandle *handle, int32_t newDamage);
 void PlayerEntitySetDefense(PlayerEntityHandle *handle, int32_t newDefense);
+void PlayerEntitySetAggro(PlayerEntityHandle *handle, int32_t newAggro);
 
 // EnemyEntity Setters
 void EnemyEntitySetHealth(EnemyEntityHandle *handle, int32_t newHealth);

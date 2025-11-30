@@ -4,7 +4,7 @@
 class PlayerEntity {
 private:
   // Basic Variables
-  int health{}, maxHealth{}, damage{}, defense{};
+  int health{}, maxHealth{}, damage{}, defense{}, aggro{};
 
 public:
   // Constructor
@@ -16,12 +16,14 @@ public:
   int getMaxHealth();
   int getDamage();
   int getDefense();
+  int getAggro();
 
   // Setters
   void setHealth(int newHealth);
   void setMaxHealth(int newMaxHealth);
   void setDamage(int newDamage);
   void setDefense(int newDefense);
+  void setAggro(int newAggro);
 };
 
 class EnemyEntity {

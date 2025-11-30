@@ -71,6 +71,12 @@ int32_t PlayerEntityGetDefense(PlayerEntityHandle *handle) {
   return TO_PLAYER_ENTITY(handle)->getDefense();
 }
 
+int32_t PlayerEntityGetAggro(PlayerEntityHandle *handle) {
+  if (!handle)
+    return 0;
+  return TO_PLAYER_ENTITY(handle)->getAggro();
+}
+
 // EnemyEntity Getters
 int32_t EnemyEntityGetHealth(EnemyEntityHandle *handle) {
   if (!handle)
@@ -145,6 +151,12 @@ void PlayerEntitySetDefense(PlayerEntityHandle *handle, int32_t newDefense) {
   if (!handle)
     return;
   TO_PLAYER_ENTITY(handle)->setDefense(newDefense);
+}
+
+void PlayerEntitySetAggro(PlayerEntityHandle *handle, int32_t newAggro) {
+  if (!handle)
+    return;
+  TO_PLAYER_ENTITY(handle)->setAggro(newAggro);
 }
 
 // EnemyEntity Setters

@@ -25,12 +25,14 @@ const getPlayerHealth = cpp.PlayerEntityGetHealth;
 const getPlayerMaxHealth = cpp.PlayerEntityGetMaxHealth;
 const getPlayerDamage = cpp.PlayerEntityGetDamage;
 const getPlayerDefense = cpp.PlayerEntityGetDefense;
+const getPlayerAggro = cpp.PlayerEntityGetAggro;
 
 // Player Entity Setters
 const setPlayerHealth = cpp.PlayerEntitySetHealth;
 const setPlayerMaxHealth = cpp.PlayerEntitySetMaxHealth;
 const setPlayerDamage = cpp.PlayerEntitySetDamage;
 const setPlayerDefense = cpp.PlayerEntitySetDefense;
+const setPlayerAggro = cpp.PlayerEntitySetAggro;
 
 // Enemy Entity Getters
 const getEnemyHealth = cpp.EnemyEntityGetHealth;
@@ -67,7 +69,7 @@ const EntityHandle = union(enum) {
 };
 
 // Used for holding buff type
-const StatType = enum { Damage, Defense, MaxHealth };
+const StatType = enum { Damage, Defense, MaxHealth, Aggro };
 
 //Used for reverting active buffs
 pub const ActiveBuff = struct { handle: EntityHandle, stat: StatType, revertVal: i32, duration: i32, revertFn: *const fn (i32, i32) i32, setFn: *const fn (?*anyopaque, i32) callconv(.c) void };
@@ -167,10 +169,14 @@ pub fn handleTankInput(tank: ?*const PlayerHandle, enemyTeam: *const [3]?*const 
 
                 // Applies tank entities' damage to the health of the chosen grunt
                 // Consider adding a stun feature
-                const currDmg = getPlayerDamage(@constCast(tank)); // Gets tanks current damage stat
-                const currHealth = getEnemyHealth(@constCast(enemyChar)); // Gets Current Enemy Health
+                const currPlayerDmg = getPlayerDamage(@constCast(tank)); // Gets tanks current damage stat
+                const currEnemyDef = getEnemyDefense(@constCast(enemyChar)); // Gets Current Enemy Defense Stat
+                const currEnemyHealth = getEnemyHealth(@constCast(enemyChar)); // Gets Current Enemy Health
 
-                try updateHealth(enemyHandle, currDmg, currHealth, null, calcDamage, setEnemyHealth);
+                const reductionFactor = 100 - currEnemyDef;
+                const officialDmg: i32 = @divFloor(currPlayerDmg * reductionFactor, 100);
+
+                try updateHealth(enemyHandle, officialDmg, currEnemyHealth, null, calcDamage, setEnemyHealth);
 
                 try stdout.print(COLOR_DAMAGE ++ "\nEnemy {c} has been hit!" ++ ANSI_RESET, .{enemyChoice});
                 try stdout.flush();
@@ -179,8 +185,11 @@ pub fn handleTankInput(tank: ?*const PlayerHandle, enemyTeam: *const [3]?*const 
             '2' => {
                 // The tank has increased damage resist for 2 turns and taunts enemy team for 3 turns
                 const currDef = getPlayerDefense(@constCast(tank)); // Gets Tanks current defense stat
+                const currAggro = getPlayerAggro(@constCast(tank)); // Gets Tanks current aggro stat
                 // Doubles current defense stat for 2 turns
                 try applyBuff(buffs, tankHandle, .Defense, currDef, 2, 2, 2, mult, divide, setPlayerDefense);
+                // Applies an Addition of 50 to aggro stat for 3 turns
+                try applyBuff(buffs, tankHandle, .Aggro, currAggro, 50, 50, 3, add, subtract, setPlayerAggro);
 
                 try stdout.print(COLOR_BUFF ++ "\nThe tanks defenses have been bolstered! " ++ COLOR_DEBUFF ++ "But, the enemy party has taken notice of the tanks presence!" ++ ANSI_RESET, .{});
                 try stdout.flush();
@@ -189,8 +198,12 @@ pub fn handleTankInput(tank: ?*const PlayerHandle, enemyTeam: *const [3]?*const 
             '3' => {
                 // The tank has increased damage and taunts enemy team
                 const currDmg = getPlayerDamage(@constCast(tank)); // Gets Tanks current damage stat
+                const currAggro = getPlayerAggro(@constCast(tank)); // Gets Tanks current aggro stat
                 // Triples current damage stat for 2 turns
                 try applyBuff(buffs, tankHandle, .Damage, currDmg, 3, 3, 2, mult, divide, setPlayerDamage);
+                // Applies an Addition of 50 to aggro stat for 3 turns
+                try applyBuff(buffs, tankHandle, .Aggro, currAggro, 50, 50, 3, add, subtract, setPlayerAggro);
+
                 try stdout.print(COLOR_BUFF ++ "\nThe tanks weapons have been emboldened! " ++ COLOR_DEBUFF ++ "But, the enemy party has taken notice of the tanks presence!" ++ ANSI_RESET, .{});
                 try stdout.flush();
                 break;
@@ -225,11 +238,15 @@ pub fn handleArcherInput(archer: ?*const PlayerHandle, enemyTeam: *const [3]?*co
                 };
 
                 const enemyHandle = EntityHandle{ .enemy = enemyChar }; // Stores enemy entities handle
-                const currDmg = getPlayerDamage(@constCast(archer)); // Gets archers current damage stat
-                const currHealth = getEnemyHealth(@constCast(enemyChar)); // Gets enemy's current health stat
+                const currPlayerDmg = getPlayerDamage(@constCast(archer)); // Gets archers current damage stat
+                const currEnemyDef = getEnemyDefense(@constCast(enemyChar));
+                const currEnemyHealth = getEnemyHealth(@constCast(enemyChar)); // Gets enemy's current health stat
+
+                const reductionFactor = 100 - currEnemyDef;
+                const officialDmg: i32 = @divFloor(currPlayerDmg * reductionFactor, 100);
 
                 // Applies archer entities' damage to the health of the chosen grunt
-                try updateHealth(enemyHandle, currDmg, currHealth, null, calcDamage, setEnemyHealth);
+                try updateHealth(enemyHandle, officialDmg, currEnemyHealth, null, calcDamage, setEnemyHealth);
 
                 // Enemy takes average damage on hit
                 try stdout.print(COLOR_DAMAGE ++ "\nEnemy {c} has been hit!" ++ ANSI_RESET, .{enemyChoice});
@@ -240,10 +257,14 @@ pub fn handleArcherInput(archer: ?*const PlayerHandle, enemyTeam: *const [3]?*co
                 // Less than average damage is applied to the every enemy
                 for (enemyTeam) |enemy| {
                     const enemyHandle = EntityHandle{ .enemy = enemy }; // Stores enemy entities handle
-                    const currDmg = @divFloor(getPlayerDamage(@constCast(archer)), 2); // Gets archers current damage stat int divided by 2 rounded down
-                    const currHealth = getEnemyHealth(@constCast(enemy)); // Gets enemy's current health stat
+                    const currPlayerDmg = @divFloor(getPlayerDamage(@constCast(archer)), 2); // Gets archers current damage stat int divided by 2 rounded down
+                    const currEnemyDef = getEnemyDefense(@constCast(enemy));
+                    const currEnemyHealth = getEnemyHealth(@constCast(enemy)); // Gets enemy's current health stat
 
-                    try updateHealth(enemyHandle, currDmg, currHealth, null, calcDamage, setEnemyHealth);
+                    const reductionFactor = 100 - currEnemyDef;
+                    const officialDmg: i32 = @divFloor(currPlayerDmg * reductionFactor, 100);
+
+                    try updateHealth(enemyHandle, officialDmg, currEnemyHealth, null, calcDamage, setEnemyHealth);
                 }
 
                 try stdout.print(COLOR_DAMAGE ++ "\nThe enemy party has been hit!" ++ ANSI_RESET, .{});
@@ -332,14 +353,38 @@ pub fn handleGruntTurn(grunt: ?*const EnemyHandle, playerTeam: *const [3]?*const
     try stdout.print(COLOR_ENEMY ++ "\nTHE GRUNT TAKES IT'S TURN!" ++ ANSI_RESET, .{});
     try stdout.flush();
 
-    const playerMember = playerTeam[randChar];
+    var targetIndex = randChar;
+    var highestAggro: i32 = 0;
+
+    for (playerTeam, 0..) |player, index| {
+        if (player) |p| {
+            // Only check aggro for living players
+            if (getPlayerHealth(@constCast(p)) > 0) {
+                const currentAggro = getPlayerAggro(@constCast(p));
+                if (currentAggro > highestAggro) {
+                    highestAggro = currentAggro;
+                    targetIndex = index;
+                }
+            }
+        }
+    }
+
+    const playerMember = playerTeam[targetIndex];
     const playerHandle = EntityHandle{ .player = playerMember };
     switch (randAbility) {
         // Attack Random Player Character
         1 => {
-            const currDmg = getEnemyDamage(@constCast(grunt));
-            const currHealth = getPlayerHealth(@constCast(playerMember));
-            try updateHealth(playerHandle, currDmg, currHealth, null, calcDamage, setPlayerHealth);
+            const currEnemyDmg = getEnemyDamage(@constCast(grunt));
+            const currPlayerHealth = getPlayerHealth(@constCast(playerMember));
+            const currPlayerDef = getPlayerDefense(@constCast(playerMember));
+
+            const reductionFactor = 100 - currPlayerDef;
+            const officialDmg: i32 = @divFloor(currEnemyDmg * reductionFactor, 100);
+
+            try updateHealth(playerHandle, officialDmg, currPlayerHealth, null, calcDamage, setPlayerHealth);
+
+            try stdout.print(COLOR_DAMAGE ++ "\nThe grunt has attacked player member {d}!" ++ ANSI_RESET, .{randChar});
+            try stdout.flush();
         },
         // Fear Random Player Character
         // Debuffs Player with less defense and less damage output
@@ -350,6 +395,9 @@ pub fn handleGruntTurn(grunt: ?*const EnemyHandle, playerTeam: *const [3]?*const
             // Subtracts Player defense by 10 and Player damage by 5 for 1 turn
             try applyBuff(buffs, playerHandle, .Defense, currDef, 10, 10, 1, subtract, add, setPlayerDefense);
             try applyBuff(buffs, playerHandle, .Damage, currDmg, 5, 5, 1, subtract, add, setPlayerDamage);
+
+            try stdout.print(COLOR_DEBUFF ++ "\nThe grunt has stricken fear in player member {d}!" ++ ANSI_RESET, .{randChar});
+            try stdout.flush();
         },
         else => unreachable,
     }
@@ -462,6 +510,15 @@ pub fn tickBuffs(buffs: *arrayList(ActiveBuff)) !void {
                             const currVal = getPlayerMaxHealth(@constCast(buff.handle.player));
                             try updateStat(buff.handle, currVal, buff.revertVal, buff.revertFn, buff.setFn);
                         },
+                    }
+                },
+                .Aggro => {
+                    switch (buff.handle) {
+                        .player => {
+                            const currVal = getPlayerAggro(@constCast(buff.handle.player));
+                            try updateStat(buff.handle, currVal, buff.revertVal, buff.revertFn, buff.setFn);
+                        },
+                        else => unreachable,
                     }
                 },
             }

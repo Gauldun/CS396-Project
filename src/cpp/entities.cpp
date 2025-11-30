@@ -14,12 +14,14 @@ int PlayerEntity::getHealth() { return health; }
 int PlayerEntity::getMaxHealth() { return maxHealth; }
 int PlayerEntity::getDamage() { return damage; }
 int PlayerEntity::getDefense() { return defense; }
+int PlayerEntity::getAggro() { return aggro; }
 
 // Setters
 void PlayerEntity::setHealth(int newHealth) { health = newHealth; }
 void PlayerEntity::setMaxHealth(int newMaxHealth) { maxHealth = newMaxHealth; }
 void PlayerEntity::setDamage(int newDamage) { damage = newDamage; }
 void PlayerEntity::setDefense(int newDefense) { defense = newDefense; }
+void PlayerEntity::setAggro(int newAggro) { aggro = newAggro; }
 
 // EnemyEntity Methods
 EnemyEntity::EnemyEntity(int hVal, int dVal, int defVal)
