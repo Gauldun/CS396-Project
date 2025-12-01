@@ -72,27 +72,45 @@ pub fn main() !void {
         for (turnOrder) |charIndex| {
             switch (charIndex) {
                 1 => {
+                    if (sys.getPlayerHealth(@constCast(tankChar)) <= 0) {
+                        continue;
+                    }
                     try sys.handleTankInput(tankChar, &enemyTeam, &activeBuffs);
                 },
                 2 => {
+                    if (sys.getPlayerHealth(@constCast(archerChar)) <= 0) {
+                        continue;
+                    }
                     try sys.handleArcherInput(archerChar, &enemyTeam, &activeBuffs);
                 },
                 3 => {
+                    if (sys.getPlayerHealth(@constCast(priestChar)) <= 0) {
+                        continue;
+                    }
                     try sys.handlePriestInput(priestChar, &playerTeam, &activeBuffs);
                 },
                 4 => {
+                    if (sys.getPlayerHealth(@constCast(grunt1)) <= 0) {
+                        continue;
+                    }
                     const randAbility = rand.uintLessThan(usize, 2) + 1;
                     const randChar = rand.uintLessThan(usize, 3);
                     try sys.handleGruntTurn(grunt1, &playerTeam, &activeBuffs, randAbility, randChar);
                     continue;
                 },
                 5 => {
+                    if (sys.getPlayerHealth(@constCast(grunt2)) <= 0) {
+                        continue;
+                    }
                     const randAbility = rand.uintLessThan(usize, 2) + 1;
                     const randChar = rand.uintLessThan(usize, 3);
                     try sys.handleGruntTurn(grunt2, &playerTeam, &activeBuffs, randAbility, randChar);
                     continue;
                 },
                 6 => {
+                    if (sys.getPlayerHealth(@constCast(grunt3)) <= 0) {
+                        continue;
+                    }
                     const randAbility = rand.uintLessThan(usize, 2) + 1;
                     const randChar = rand.uintLessThan(usize, 3);
                     try sys.handleGruntTurn(grunt3, &playerTeam, &activeBuffs, randAbility, randChar);

@@ -21,42 +21,42 @@ pub const stdin = &stdinReader.interface;
 pub const arrayList = std.array_list.Managed;
 
 // Player Entity Getters
-const getPlayerHealth = cpp.PlayerEntityGetHealth;
-const getPlayerMaxHealth = cpp.PlayerEntityGetMaxHealth;
-const getPlayerDamage = cpp.PlayerEntityGetDamage;
-const getPlayerDefense = cpp.PlayerEntityGetDefense;
-const getPlayerAggro = cpp.PlayerEntityGetAggro;
+pub const getPlayerHealth = cpp.PlayerEntityGetHealth;
+pub const getPlayerMaxHealth = cpp.PlayerEntityGetMaxHealth;
+pub const getPlayerDamage = cpp.PlayerEntityGetDamage;
+pub const getPlayerDefense = cpp.PlayerEntityGetDefense;
+pub const getPlayerAggro = cpp.PlayerEntityGetAggro;
 
 // Player Entity Setters
-const setPlayerHealth = cpp.PlayerEntitySetHealth;
-const setPlayerMaxHealth = cpp.PlayerEntitySetMaxHealth;
-const setPlayerDamage = cpp.PlayerEntitySetDamage;
-const setPlayerDefense = cpp.PlayerEntitySetDefense;
-const setPlayerAggro = cpp.PlayerEntitySetAggro;
+pub const setPlayerHealth = cpp.PlayerEntitySetHealth;
+pub const setPlayerMaxHealth = cpp.PlayerEntitySetMaxHealth;
+pub const setPlayerDamage = cpp.PlayerEntitySetDamage;
+pub const setPlayerDefense = cpp.PlayerEntitySetDefense;
+pub const setPlayerAggro = cpp.PlayerEntitySetAggro;
 
 // Enemy Entity Getters
-const getEnemyHealth = cpp.EnemyEntityGetHealth;
-const getEnemyMaxHealth = cpp.EnemyEntityGetMaxHealth;
-const getEnemyDamage = cpp.EnemyEntityGetDamage;
-const getEnemyDefense = cpp.EnemyEntityGetDefense;
+pub const getEnemyHealth = cpp.EnemyEntityGetHealth;
+pub const getEnemyMaxHealth = cpp.EnemyEntityGetMaxHealth;
+pub const getEnemyDamage = cpp.EnemyEntityGetDamage;
+pub const getEnemyDefense = cpp.EnemyEntityGetDefense;
 
 // Enemy Entity Setters
-const setEnemyHealth = cpp.EnemyEntitySetHealth;
-const setEnemyMaxHealth = cpp.EnemyEntitySetMaxHealth;
-const setEnemyDamage = cpp.EnemyEntitySetDamage;
-const setEnemyDefense = cpp.EnemyEntitySetDefense;
+pub const setEnemyHealth = cpp.EnemyEntitySetHealth;
+pub const setEnemyMaxHealth = cpp.EnemyEntitySetMaxHealth;
+pub const setEnemyDamage = cpp.EnemyEntitySetDamage;
+pub const setEnemyDefense = cpp.EnemyEntitySetDefense;
 
 // Item Getters
-const getItemHealth = cpp.ItemGetHealth;
-const getItemDamage = cpp.ItemGetDamage;
-const getItemDefense = cpp.ItemGetDamage;
-const getItemSelfDamage = cpp.ItemGetSelfDamage;
+pub const getItemHealth = cpp.ItemGetHealth;
+pub const getItemDamage = cpp.ItemGetDamage;
+pub const getItemDefense = cpp.ItemGetDamage;
+pub const getItemSelfDamage = cpp.ItemGetSelfDamage;
 
 // Item Setters
-const setItemHealth = cpp.ItemSetHealth;
-const setItemDamage = cpp.ItemSetDamage;
-const setItemDefense = cpp.ItemSetDefense;
-const setItemSelfDamage = cpp.ItemSetSelfDamage;
+pub const setItemHealth = cpp.ItemSetHealth;
+pub const setItemDamage = cpp.ItemSetDamage;
+pub const setItemDefense = cpp.ItemSetDefense;
+pub const setItemSelfDamage = cpp.ItemSetSelfDamage;
 
 // Entity Constants
 const PlayerHandle = cpp.PlayerEntityHandle;
