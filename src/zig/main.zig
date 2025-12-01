@@ -35,34 +35,46 @@ pub fn main() !void {
     // Vague Rarity Items
     // Rusty Shiv: Additional 5 Damage
     const rustyShiv = createItem(5, 0, 0, 0);
+    defer destroyItem(rustyShiv);
     // Tattered Cloth: Additional 10 Health
     const tatteredCloth = createItem(0, 10, 0, 0);
+    defer destroyItem(tatteredCloth);
     // Broken Shield: Additional 5 Health, 3% Defense
     const brokenShield = createItem(0, 5, 3, 0);
+    defer destroyItem(brokenShield);
     // Suspicious Potion: Additional 5% Damage, 15 Health, 5 Damage to Self Every Round
     const susPotion = createItem(5, 15, 0, 5);
+    defer destroyItem(susPotion);
 
     // Distant Rarity Items
     // Iron Longsword: Additional 10 Damage, 3% Defense
     const ironSword = createItem(10, 0, 3, 0);
+    defer destroyItem(ironSword);
     // Leather Armor Set: Additional 20 Health, 10% Defense
     const leatherArmor = createItem(0, 20, 10, 0);
+    defer destroyItem(leatherArmor);
     // Sturdy Buckler: Addtional 5 Damage, 15 Health, 5% Defense
     const sturdyBuckler = createItem(5, 15, 5, 0);
+    defer destroyItem(sturdyBuckler);
     // Sharp Duelist's Rapier: Additional 15 Damage, 5% Defense
     const sharpRapier = createItem(15, 0, 5, 0);
+    defer destroyItem(sharpRapier);
 
     // Indelible Rarity Items
     // Runed BattleAxe: Additional 25 Damage, 25 Health, 5% Defense
     const runedAxe = createItem(25, 25, 5, 0);
+    defer destroyItem(runedAxe);
     // Guardian Platemail: Additional 50 Health, 15% Defense
     const guardianPlate = createItem(0, 50, 15, 0);
+    defer destroyItem(guardianPlate);
 
     // Unforgettable Rarity Items
     // Holy Blade Iem: Additional 50 Damage, 20 Health, 5% Defense, 15 Damage to Self Every Round
     const hollowedBlade = createItem(50, 20, 5, 15);
+    defer destroyItem(hollowedBlade);
     // Ancient Armor: Additional 10 Damage, 100 Health, 30% Defense
     const ancientAegis = createItem(10, 100, 30, 0);
+    defer destroyItem(ancientAegis);
 
     const items = [_]?*cpp.ItemHandle{
         rustyShiv,
@@ -81,15 +93,21 @@ pub fn main() !void {
 
     // Tank Player Party Character w/ Base Stats; 100 Health, 15 Damage, 25% Defense
     const tankChar = createPlayerChar(100, 15, 25);
+    defer destroyPlayerChar(tankChar);
     // Priest Player Party Character w/ Base Stats; 50 Health, 0 Damage, 10% Defense
     const priestChar = createPlayerChar(50, 20, 10);
+    defer destroyPlayerChar(priestChar);
     // Archer Player Party Character w/ Base Stats; 75 Health, 30 Damge, 15% Defense
     const archerChar = createPlayerChar(75, 30, 15);
+    defer destroyPlayerChar(archerChar);
 
     // Enemy Grunt For First Enemy Party; 50 Health, 20 Damage, 5% Defense
     const grunt1 = createEnemyChar(50, 15, 5);
+    defer destroyEnemyChar(grunt1);
     const grunt2 = createEnemyChar(50, 15, 5);
+    defer destroyEnemyChar(grunt2);
     const grunt3 = createEnemyChar(50, 15, 5);
+    defer destroyEnemyChar(grunt3);
 
     var playerTeam = [_]?*const cpp.PlayerEntityHandle{
         tankChar,
@@ -102,20 +120,6 @@ pub fn main() !void {
         grunt2,
         grunt3,
     };
-
-    // Defer Entity Destructors
-    for (playerTeam) |player| {
-        defer (destroyPlayerChar(@constCast(player)));
-    }
-
-    for (enemyTeam) |enemy| {
-        defer (destroyEnemyChar(@constCast(enemy)));
-    }
-
-    // Defer Item Destructors
-    for (items) |item| {
-        defer (destroyItem(@constCast(item)));
-    }
 
     // Random Number Gen
     const rand = std.crypto.random;
