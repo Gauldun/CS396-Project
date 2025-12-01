@@ -59,8 +59,8 @@ pub const setItemDefense = cpp.ItemSetDefense;
 pub const setItemSelfDamage = cpp.ItemSetSelfDamage;
 
 // Entity Constants
-const PlayerHandle = cpp.PlayerEntityHandle;
-const EnemyHandle = cpp.EnemyEntityHandle;
+pub const PlayerHandle = cpp.PlayerEntityHandle;
+pub const EnemyHandle = cpp.EnemyEntityHandle;
 
 // EntityHandle Enum For Functions Calls
 const EntityHandle = union(enum) {
@@ -529,4 +529,20 @@ pub fn tickBuffs(buffs: *arrayList(ActiveBuff)) !void {
             i += 1;
         }
     }
+}
+
+pub fn checkGameEnd(enemyTeam: *const [3]?*const EnemyHandle, playerTeam: *const [3]?*const PlayerHandle) u8 {
+    var deadPlayerMembers: u8 = 0;
+    var deadEnemyMembers: u8 = 0;
+    for (playerTeam) |player| {
+        if (getPlayerHealth(@constCast(player)) <= 0) {
+            deadPlayerMembers += 1;
+        }
+    }
+    for (enemyTeam) |enemy| {
+        if (getEnemyHealth(@constCast(enemy)) <= 0) {
+            deadEnemyMembers += 1;
+        }
+    }
+    return if (deadEnemyMembers >= 3) 1 else if (deadPlayerMembers >= 3) 2 else 0;
 }

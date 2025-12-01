@@ -119,8 +119,32 @@ pub fn main() !void {
                 else => unreachable,
             }
         }
-        // End Player Character Handling Loop
-        try sys.tickBuffs(&activeBuffs);
-        try sys.displayStats(&playerTeam, &enemyTeam);
+        // If Player's team is dead (end game), if enemy's team is dead (end current loop), if neither (continue)
+        const breakLoop = try processGameState(&activeBuffs, &playerTeam, &enemyTeam);
+        if (breakLoop) {
+            break;
+        }
     } // End of Game Loop
+}
+
+fn processGameState(activeBuffs: *arrayList(sys.ActiveBuff), playerTeam: *const [3]?*const sys.PlayerHandle, enemyTeam: *const [3]?*const sys.EnemyHandle) !bool {
+    const gameEnd = sys.checkGameEnd(enemyTeam, playerTeam);
+    switch (gameEnd) {
+        1 => {
+            try stdout.print(sys.COLOR_HERO ++ "\nThe enemy's team has died!" ++ sys.ANSI_RESET, .{});
+            try stdout.flush();
+            return true;
+        },
+        2 => {
+            try stdout.print(sys.COLOR_ENEMY ++ "\nThe player's team has died!" ++ sys.ANSI_RESET, .{});
+            try stdout.flush();
+            std.process.exit(0);
+        },
+        0 => {
+            try sys.tickBuffs(activeBuffs);
+            try sys.displayStats(playerTeam, enemyTeam);
+            return false;
+        },
+        else => unreachable,
+    }
 }
