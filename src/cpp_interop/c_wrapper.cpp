@@ -36,7 +36,31 @@ void EnemyEntityDestroy(EnemyEntityHandle *handle) {
 }
 void ItemDestroy(ItemHandle *handle) { delete TO_ITEM(handle); }
 
-// Methods
+// PlayerEntity for Item
+void PlayerEntityEquipItem(PlayerEntityHandle *handle, ItemHandle *itemHandle) {
+  if (!handle)
+    return;
+  TO_PLAYER_ENTITY(handle)->equipItem(TO_ITEM(itemHandle));
+}
+
+ItemHandle *PlayerEntityGetItem(PlayerEntityHandle *handle) {
+  if (!handle)
+    return nullptr;
+  Item *itemPtr = TO_PLAYER_ENTITY(handle)->getHeldItem();
+  return reinterpret_cast<ItemHandle *>(itemPtr);
+}
+
+bool PlayerEntityHasItem(PlayerEntityHandle *handle) {
+  if (!handle)
+    return false;
+  return TO_PLAYER_ENTITY(handle)->hasItem();
+}
+
+void PlayerEntityDropItem(PlayerEntityHandle *handle) {
+  if (!handle)
+    return;
+  TO_PLAYER_ENTITY(handle)->dropItem();
+}
 
 // PlayerEntity Getters
 int32_t PlayerEntityGetHealth(PlayerEntityHandle *handle) {

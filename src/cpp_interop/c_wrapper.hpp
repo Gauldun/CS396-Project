@@ -25,6 +25,10 @@ void EnemyEntityDestroy(EnemyEntityHandle *handle);
 void ItemDestroy(ItemHandle *handle);
 
 // PlayerEntity Methods
+void PlayerEntityEquipItem(PlayerEntityHandle *handle, ItemHandle *itemHandle);
+ItemHandle *PlayerEntityGetItem(PlayerEntityHandle *handle);
+bool PlayerEntityHasItem(PlayerEntityHandle *handle);
+void PlayerEntityDropItem(PlayerEntityHandle *handle);
 
 // EnemyEntity Methods
 

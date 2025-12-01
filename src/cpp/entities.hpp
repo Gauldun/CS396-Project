@@ -1,10 +1,13 @@
 #ifndef ENTITIES_H
 #define ENTITIES_H
 
+class Item; // Forward Declaration for PlayerEntity
+
 class PlayerEntity {
 private:
   // Basic Variables
   int health{}, maxHealth{}, damage{}, defense{}, aggro{};
+  Item *heldItem{nullptr};
 
 public:
   // Constructor
@@ -23,6 +26,11 @@ public:
   void setDamage(int newDamage);
   void setDefense(int newDefense);
   void setAggro(int newAggro);
+
+  void equipItem(Item *item);
+  Item *getHeldItem();
+  bool hasItem();
+  void dropItem();
 };
 
 class EnemyEntity {

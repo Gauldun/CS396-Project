@@ -19,6 +19,9 @@ const destroyPlayerChar = cpp.PlayerEntityDestroy;
 const createEnemyChar = cpp.EnemyEntityCreate;
 const destroyEnemyChar = cpp.EnemyEntityDestroy;
 
+const createItem = cpp.ItemHandleCreate;
+const destroyItem = cpp.ItemDestroy;
+
 pub fn main() !void {
     // For memory allocation
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
@@ -28,6 +31,26 @@ pub fn main() !void {
     // Stores all active buffs
     var activeBuffs = arrayList(sys.ActiveBuff).init(allocator);
     defer activeBuffs.deinit();
+
+    // Vague Rarity Items
+    const rustyShiv = createItem(5, 0, 0, 0);
+    const tatteredCloth = createItem(0, 10, 0, 0);
+    const brokenShield = createItem(0, 5, 3, 0);
+    const susPotion = createItem(5, 15, 0, 5);
+
+    // Distant Rarity Items
+    const ironSword = createItem(10, 0, 3, 0);
+    const leatherArmor = createItem(0, 20, 5, 0);
+    const sturdyBuckler = createItem(5, 15, 10, 0);
+    const sharpRapier = createItem(15, 0, 5, 0);
+
+    // Indelible Rarity Items
+    const runedAxe = createItem(25, 25, 5, 0);
+    const guardianPlate = createItem(0, 50, 15, 0);
+
+    // Unforgettable Rarity Items
+    const hollowedBlade = createItem(50, 20, 5, 15);
+    const ancientAegis = createItem(10, 100, 30, 0);
 
     // Tank Player Party Character w/ Base Stats; 100 Health, 15 Damage, 25% Defense
     const tankChar = createPlayerChar(100, 15, 25);

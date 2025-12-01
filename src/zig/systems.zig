@@ -34,6 +34,12 @@ pub const setPlayerDamage = cpp.PlayerEntitySetDamage;
 pub const setPlayerDefense = cpp.PlayerEntitySetDefense;
 pub const setPlayerAggro = cpp.PlayerEntitySetAggro;
 
+//Player Entity Methods for Item Usage
+pub const equipItem = cpp.PlayerEntityEquipItem;
+pub const getPlayerItem = cpp.PlayerEntityGetItem;
+pub const playerHasItem = cpp.PlayerEntityHasItem;
+pub const dropItem = cpp.PlayerEntityDropItem;
+
 // Enemy Entity Getters
 pub const getEnemyHealth = cpp.EnemyEntityGetHealth;
 pub const getEnemyMaxHealth = cpp.EnemyEntityGetMaxHealth;

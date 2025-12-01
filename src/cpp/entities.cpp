@@ -4,6 +4,12 @@
 PlayerEntity::PlayerEntity(int hVal, int dVal, int defVal)
     : health{hVal}, maxHealth{hVal}, damage{dVal}, defense{defVal} {}
 
+// PlayerEntity Methods Regarding Item Usage
+void PlayerEntity::equipItem(Item *item) { this->heldItem = item; }
+Item *PlayerEntity::getHeldItem() { return this->heldItem; }
+bool PlayerEntity::hasItem() { return this->heldItem != nullptr; }
+void PlayerEntity::dropItem() { this->heldItem = nullptr; }
+
 // Getters
 int PlayerEntity::getHealth() { return health; }
 int PlayerEntity::getMaxHealth() { return maxHealth; }
