@@ -50,6 +50,7 @@ int32_t ItemGetDamage(ItemHandle *handle);
 int32_t ItemGetHealth(ItemHandle *handle);
 int32_t ItemGetDefense(ItemHandle *handle);
 int32_t ItemGetSelfDamage(ItemHandle *handle);
+const char *ItemGetItemName(ItemHandle *handle);
 
 // PlayerEntity Setters
 void PlayerEntitySetHealth(PlayerEntityHandle *handle, int32_t newHealth);

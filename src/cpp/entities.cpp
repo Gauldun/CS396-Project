@@ -49,6 +49,7 @@ int Item::getDamage() { return damage; }
 int Item::getHealth() { return health; }
 int Item::getDefense() { return defense; }
 int Item::getSelfDamage() { return selfDamage; }
+const char *Item::getItemName() { return itemName.c_str(); }
 
 // Setters
 // Probably useless but just in case

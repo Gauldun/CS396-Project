@@ -143,6 +143,12 @@ int32_t ItemGetSelfDamage(ItemHandle *handle) {
   return TO_ITEM(handle)->getSelfDamage();
 }
 
+const char *ItemGetItemName(ItemHandle *handle) {
+  if (!handle)
+    return "";
+  return TO_ITEM(handle)->getItemName();
+}
+
 // PlayerEntity Setters
 void PlayerEntitySetHealth(PlayerEntityHandle *handle, int32_t newHealth) {
   if (!handle)

@@ -1,6 +1,8 @@
 #ifndef ENTITIES_H
 #define ENTITIES_H
 
+#include <string>
+
 class Item; // Forward Declaration for PlayerEntity
 
 class PlayerEntity {
@@ -56,6 +58,7 @@ public:
 class Item {
 private:
   int damage{}, health{}, defense{}, selfDamage{};
+  std::string itemName;
 
 public:
   Item(int dVal = 0, int hVal = 0, int defVal = 0, int sDVal = 0);
@@ -65,6 +68,7 @@ public:
   int getHealth();
   int getDefense();
   int getSelfDamage();
+  const char *getItemName();
 
   // Setters
   // Probably useless but just in case

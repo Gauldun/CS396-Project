@@ -57,6 +57,7 @@ pub const getItemHealth = cpp.ItemGetHealth;
 pub const getItemDamage = cpp.ItemGetDamage;
 pub const getItemDefense = cpp.ItemGetDamage;
 pub const getItemSelfDamage = cpp.ItemGetSelfDamage;
+pub const getItemName = cpp.ItemGetItemName;
 
 // Item Setters
 pub const setItemHealth = cpp.ItemSetHealth;
