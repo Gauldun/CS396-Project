@@ -25,8 +25,6 @@ void EnemyEntityDestroy(EnemyEntityHandle *handle);
 void ItemDestroy(ItemHandle *handle);
 
 // PlayerEntity Methods
-int32_t PlayerEntityEquipItem(PlayerEntityHandle *handle, int32_t modifiedVal,
-                              int32_t newItemMod, int32_t oldItemMod);
 
 // EnemyEntity Methods
 

@@ -9,7 +9,6 @@ private:
 public:
   // Constructor
   PlayerEntity(int hVal = 100, int dVal = 20, int defVal = 15);
-  int equipItem(int modifiedVal, int newItemMod, int oldItemMod);
 
   // Getters
   int getHealth();

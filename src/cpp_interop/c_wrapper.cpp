@@ -37,14 +37,6 @@ void EnemyEntityDestroy(EnemyEntityHandle *handle) {
 void ItemDestroy(ItemHandle *handle) { delete TO_ITEM(handle); }
 
 // Methods
-int32_t PlayerEntityEquipItem(PlayerEntityHandle *handle, int32_t modifiedVal,
-                              int32_t newItemMod, int32_t oldItemMod) {
-  // Check For NULL Handle
-  if (!handle)
-    return 0;
-  return TO_PLAYER_ENTITY(handle)->equipItem(modifiedVal, newItemMod,
-                                             oldItemMod);
-}
 
 // PlayerEntity Getters
 int32_t PlayerEntityGetHealth(PlayerEntityHandle *handle) {

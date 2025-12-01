@@ -4,11 +4,6 @@
 PlayerEntity::PlayerEntity(int hVal, int dVal, int defVal)
     : health{hVal}, maxHealth{hVal}, damage{dVal}, defense{defVal} {}
 
-int PlayerEntity::equipItem(int modifiedVal, int newItemMod, int oldItemMod) {
-  modifiedVal = -(oldItemMod) + newItemMod;
-  return modifiedVal;
-}
-
 // Getters
 int PlayerEntity::getHealth() { return health; }
 int PlayerEntity::getMaxHealth() { return maxHealth; }
