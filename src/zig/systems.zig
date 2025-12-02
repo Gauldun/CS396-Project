@@ -106,8 +106,9 @@ pub const COLOR_HERO = YELLOW;
 pub const COLOR_ENEMY = RED;
 pub const COLOR_HEAL = GREEN;
 pub const COLOR_DAMAGE = RED;
+pub const COLOR_DEFENSE = CYAN;
 pub const COLOR_CRIT = ORANGE;
-pub const COLOR_BUFF = YELLOW;
+pub const COLOR_BUFF = MAGENTA;
 pub const COLOR_DEBUFF = BLUE;
 pub const COLOR_STRESS = MAGENTA;
 pub const COLOR_ABILITY = BLUE;
@@ -146,14 +147,31 @@ pub fn displayStats(playerTeam: *const [3]?*const PlayerHandle, enemyTeam: *cons
     const enemyMiddle = enemyTeam[1];
     const enemyRear = enemyTeam[2];
 
+    try stdout.print(COLOR_HERO ++ "\nPlayer's Team Status:" ++ ANSI_RESET, .{});
+    try stdout.flush();
+
+    try displayCharStats(tank, "Tank");
+    try displayCharStats(archer, "Archer");
+    try displayCharStats(priest, "Priest");
+
     // Display Health
-    try stdout.print(COLOR_HERO ++ "\nPlayer's Team Status: " ++
-        COLOR_HERO ++ "\nTank Health: " ++ COLOR_HEAL ++ "{d}" ++
-        COLOR_HERO ++ "\nArcher Health: " ++ COLOR_HEAL ++ "{d}" ++
-        COLOR_HERO ++ "\nPriest Health: " ++ COLOR_HEAL ++ "{d}" ++
+    try stdout.print(COLOR_ENEMY ++ "\nEnemy Team's Status:" ++
         COLOR_ENEMY ++ "\nEnemy Front Health: " ++ COLOR_HEAL ++ "{d}" ++
         COLOR_ENEMY ++ "\nEnemy Middle Health: " ++ COLOR_HEAL ++ "{d}" ++
-        COLOR_ENEMY ++ "\nEnemy Rear Health: " ++ COLOR_HEAL ++ "{d}\n" ++ ANSI_RESET, .{ getPlayerHealth(@constCast(tank)), getPlayerHealth(@constCast(archer)), getPlayerHealth(@constCast(priest)), getEnemyHealth(@constCast(enemyFront)), getEnemyHealth(@constCast(enemyMiddle)), getEnemyHealth(@constCast(enemyRear)) });
+        COLOR_ENEMY ++ "\nEnemy Rear Health: " ++ COLOR_HEAL ++ "{d}\n" ++ ANSI_RESET, .{ getEnemyHealth(@constCast(enemyFront)), getEnemyHealth(@constCast(enemyMiddle)), getEnemyHealth(@constCast(enemyRear)) });
+    try stdout.flush();
+}
+
+fn displayCharStats(player: ?*const PlayerHandle, playerName: []const u8) !void {
+    try stdout.print(COLOR_HERO ++ "\n{s}'s Stats:" ++
+        "\nHealth: " ++ COLOR_HEAL ++ "{d}/{d}" ++
+        COLOR_HERO ++ "\nDamage: " ++ COLOR_DAMAGE ++ "{d}" ++
+        COLOR_HERO ++ "\nDefense: " ++ COLOR_DEFENSE ++ "{d}" ++ ANSI_RESET, .{ playerName, getPlayerHealth(@constCast(player)), getPlayerMaxHealth(@constCast(player)), getPlayerDamage(@constCast(player)), getPlayerDefense(@constCast(player)) });
+    try stdout.flush();
+    if (playerHasItem(@constCast(player))) {
+        try stdout.print(COLOR_HERO ++ "\nEquipped Item: " ++ COLOR_BUFF ++ "{s}" ++ ANSI_RESET, .{getItemName(@constCast(player))});
+        try stdout.flush();
+    }
 }
 
 pub fn handleTankInput(tank: ?*const PlayerHandle, enemyTeam: *const [3]?*const EnemyHandle, buffs: *arrayList(ActiveBuff)) !void {
