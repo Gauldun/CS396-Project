@@ -196,7 +196,7 @@ pub fn handleTankInput(tank: ?*const PlayerHandle, enemyTeam: *const [3]?*const 
 
                 const enemyHandle = EntityHandle{ .enemy = enemyChar };
 
-                // Applies tank entities' damage to the health of the chosen grunt
+                // Applies tank entities' damage to the health of the chosen enemy
                 // Consider adding a stun feature
                 const currPlayerDmg = getPlayerDamage(@constCast(tank)); // Gets tanks current damage stat
                 const currEnemyDef = getEnemyDefense(@constCast(enemyChar)); // Gets Current Enemy Defense Stat
@@ -274,7 +274,7 @@ pub fn handleArcherInput(archer: ?*const PlayerHandle, enemyTeam: *const [3]?*co
                 const reductionFactor = 100 - currEnemyDef;
                 const officialDmg: i32 = @divFloor(currPlayerDmg * reductionFactor, 100);
 
-                // Applies archer entities' damage to the health of the chosen grunt
+                // Applies archer entities' damage to the health of the chosen enemy
                 try updateHealth(enemyHandle, officialDmg, currEnemyHealth, null, calcDamage, setEnemyHealth);
 
                 // Enemy takes average damage on hit
@@ -432,6 +432,63 @@ pub fn handleGruntTurn(grunt: ?*const EnemyHandle, playerTeam: *const [3]?*const
     }
 }
 
+pub fn handleCultistTurn(cultist: ?*const EnemyHandle, playerTeam: *const [3]?*const PlayerHandle, buffs: *arrayList(ActiveBuff), randAbility: usize, randChar: usize) !void {
+    try stdout.print(COLOR_ENEMY ++ "\nTHE CULTIST TAKES ITS TURN!" ++ ANSI_RESET, .{});
+    try stdout.flush();
+
+    var targetIndex = randChar;
+    var highestAggro: i32 = 0;
+
+    for (playerTeam, 0..) |player, index| {
+        if (player) |p| {
+            // Only check aggro for living players
+            if (getPlayerHealth(@constCast(p)) > 0) {
+                const currentAggro = getPlayerAggro(@constCast(p));
+                if (currentAggro > highestAggro) {
+                    highestAggro = currentAggro;
+                    targetIndex = index;
+                }
+            }
+        }
+    }
+    const playerMember = playerTeam[targetIndex];
+    const playerHandle = EntityHandle{ .player = playerMember };
+    const enemyHandle = EntityHandle{ .enemy = cultist };
+
+    switch (randAbility) {
+        1 => {
+            const currEnemyDmg = getEnemyDamage(@constCast(cultist));
+            const currEnemyHealth = getEnemyHealth(@constCast(cultist));
+            const currEnemyMaxHealth = getEnemyMaxHealth(@constCast(cultist));
+            const currPlayerHealth = getPlayerHealth(@constCast(playerMember));
+            const currPlayerDef = getPlayerDefense(@constCast(playerMember));
+
+            const reductionFactor = 100 - currPlayerDef;
+            const officialDmg: i32 = @divFloor(currEnemyDmg * reductionFactor, 100);
+
+            try updateHealth(playerHandle, officialDmg, currPlayerHealth, null, calcDamage, setPlayerHealth);
+            try updateHealth(enemyHandle, @divFloor(officialDmg, 2), currEnemyHealth, currEnemyMaxHealth, calcHeal, setEnemyHealth);
+
+            try stdout.print(COLOR_DAMAGE ++ "\nThe cultist has sucked the life from player member {d}!" ++ ANSI_RESET, .{randChar});
+            try stdout.flush();
+        },
+        2 => {
+            const currDef = getEnemyDefense(@constCast(cultist));
+            const currDmg = getEnemyDamage(@constCast(cultist));
+            const currMaxHealth = getEnemyMaxHealth(@constCast(cultist));
+
+            // Subtracts Player defense by 10 and Player damage by 5 for 1 turn
+            try applyBuff(buffs, enemyHandle, .Defense, currDef, 15, 15, 2, add, subtract, setEnemyDefense);
+            try applyBuff(buffs, enemyHandle, .Damage, currDmg, 15, 15, 3, add, subtract, setEnemyDamage);
+            try applyBuff(buffs, enemyHandle, .MaxHealth, currMaxHealth, 40, 40, 2, add, subtract, setEnemyMaxHealth);
+
+            try stdout.print(COLOR_DEBUFF ++ "\nThe cultist has enchanted itself!" ++ ANSI_RESET, .{});
+            try stdout.flush();
+        },
+        else => unreachable,
+    }
+}
+
 // Functional: Returns new health value after character takes damage
 fn calcDamage(damage: i32, health: i32, _: ?i32) i32 {
     const result = if ((health - damage) <= 0) 0 else health - damage;
@@ -560,6 +617,65 @@ pub fn tickBuffs(buffs: *arrayList(ActiveBuff)) !void {
     }
 }
 
+pub fn clearActiveBuffs(buffs: *arrayList(ActiveBuff)) !void {
+    for (buffs.items) |buff| {
+        switch (buff.stat) {
+            .Defense => {
+                switch (buff.handle) {
+                    .enemy => {
+                        const currVal = getEnemyDefense(@constCast(buff.handle.enemy));
+                        try updateStat(buff.handle, currVal, buff.revertVal, buff.revertFn, buff.setFn);
+                    },
+                    .player => {
+                        const currVal = getPlayerDefense(@constCast(buff.handle.player));
+                        try updateStat(buff.handle, currVal, buff.revertVal, buff.revertFn, buff.setFn);
+                    },
+                }
+            },
+            .Damage => {
+                switch (buff.handle) {
+                    .enemy => {
+                        const currVal = getEnemyDamage(@constCast(buff.handle.enemy));
+                        try updateStat(buff.handle, currVal, buff.revertVal, buff.revertFn, buff.setFn);
+                    },
+                    .player => {
+                        const currVal = getPlayerDamage(@constCast(buff.handle.player));
+                        try updateStat(buff.handle, currVal, buff.revertVal, buff.revertFn, buff.setFn);
+                    },
+                }
+            },
+            .MaxHealth => {
+                switch (buff.handle) {
+                    .enemy => {
+                        const currVal = getEnemyMaxHealth(@constCast(buff.handle.enemy));
+                        try updateStat(buff.handle, currVal, buff.revertVal, buff.revertFn, buff.setFn);
+                    },
+                    .player => {
+                        const currVal = getPlayerMaxHealth(@constCast(buff.handle.player));
+                        try updateStat(buff.handle, currVal, buff.revertVal, buff.revertFn, buff.setFn);
+                    },
+                }
+            },
+            .Aggro => {
+                switch (buff.handle) {
+                    .player => {
+                        const currVal = getPlayerAggro(@constCast(buff.handle.player));
+                        try updateStat(buff.handle, currVal, buff.revertVal, buff.revertFn, buff.setFn);
+                    },
+                    else => unreachable,
+                }
+            },
+        }
+    }
+    buffs.clearRetainingCapacity();
+}
+
+pub fn resetCharHealth(playerTeam: *const [3]?*const PlayerHandle) !void {
+    for (playerTeam) |player| {
+        setPlayerHealth(@constCast(player), getPlayerHealth(@constCast(player)));
+    }
+}
+
 pub fn checkGameEnd(enemyTeam: *const [3]?*const EnemyHandle, playerTeam: *const [3]?*const PlayerHandle) u8 {
     var deadPlayerMembers: u8 = 0;
     var deadEnemyMembers: u8 = 0;
@@ -637,9 +753,9 @@ fn updateCharWithItem(playerTeam: *const [3]?*const PlayerHandle, item: ?*const 
 }
 
 fn equipNewItem(playerTeam: *const [3]?*const PlayerHandle, player: ?*const PlayerHandle, playerName: []const u8, item: ?*const ItemHandle, COLOR: []const u8) !void {
-    const currPlayerDmg = getPlayerDamage(@constCast(player));
-    const currPlayerHealth = getPlayerHealth(@constCast(player));
-    const currPlayerDefense = getPlayerDefense(@constCast(player));
+    var currPlayerDmg = getPlayerDamage(@constCast(player));
+    var currPlayerMaxHealth = getPlayerHealth(@constCast(player));
+    var currPlayerDefense = getPlayerDefense(@constCast(player));
     const newItemName = getItemName(@constCast(item));
 
     const playerHandle = EntityHandle{ .player = player };
@@ -665,7 +781,7 @@ fn equipNewItem(playerTeam: *const [3]?*const PlayerHandle, player: ?*const Play
                     const currItemDefense = getItemDefense(@constCast(currItem));
 
                     try updateStat(playerHandle, currPlayerDmg, currItemDmg, subtract, setPlayerDamage);
-                    try updateStat(playerHandle, currPlayerHealth, currItemHealth, subtract, setPlayerHealth);
+                    try updateStat(playerHandle, currPlayerMaxHealth, currItemHealth, subtract, setPlayerMaxHealth);
                     try updateStat(playerHandle, currPlayerDefense, currItemDefense, subtract, setPlayerDefense);
 
                     return;
@@ -688,8 +804,12 @@ fn equipNewItem(playerTeam: *const [3]?*const PlayerHandle, player: ?*const Play
     const newItemHealth = getItemHealth(@constCast(item));
     const newItemDefense = getItemDefense(@constCast(item));
 
+    currPlayerDmg = getPlayerDamage(@constCast(player));
+    currPlayerMaxHealth = getPlayerHealth(@constCast(player));
+    currPlayerDefense = getPlayerDefense(@constCast(player));
+
     try updateStat(playerHandle, currPlayerDmg, newItemDmg, add, setPlayerDamage);
-    try updateStat(playerHandle, currPlayerHealth, newItemHealth, add, setPlayerHealth);
+    try updateStat(playerHandle, currPlayerMaxHealth, newItemHealth, add, setPlayerMaxHealth);
     try updateStat(playerHandle, currPlayerDefense, newItemDefense, add, setPlayerDefense);
 
     try stdout.print(COLOR_HERO ++ "\nThe {s} has equipped the {s}{s} " ++ COLOR_HERO ++ "!" ++ ANSI_RESET, .{ playerName, COLOR, newItemName });

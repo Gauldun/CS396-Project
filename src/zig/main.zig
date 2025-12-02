@@ -101,93 +101,175 @@ pub fn main() !void {
     const archerChar = createPlayerChar(75, 30, 15);
     defer destroyPlayerChar(archerChar);
 
-    // Enemy Grunt For First Enemy Party; 50 Health, 20 Damage, 5% Defense
-    const grunt1 = createEnemyChar(50, 15, 5);
-    defer destroyEnemyChar(grunt1);
-    const grunt2 = createEnemyChar(50, 15, 5);
-    defer destroyEnemyChar(grunt2);
-    const grunt3 = createEnemyChar(50, 15, 5);
-    defer destroyEnemyChar(grunt3);
-
     const playerTeam = [_]?*const cpp.PlayerEntityHandle{
         tankChar,
         archerChar,
         priestChar,
     };
 
-    const enemyTeam = [_]?*const cpp.EnemyEntityHandle{
-        grunt1,
-        grunt2,
-        grunt3,
-    };
-
     // Random Number Gen
     const rand = std.crypto.random;
 
-    while (true) {
-        // Randomizes turn order for all players and enemies
-        var turnOrder = [_]usize{ 1, 2, 3, 4, 5, 6 };
-        rand.shuffle(usize, &turnOrder);
+    { // Begin First Game Loop
+        // Enemy Grunt: 50 Health, 20 Damage, 5% Defense
+        const grunt1 = createEnemyChar(50, 15, 5);
+        defer destroyEnemyChar(grunt1);
+        const grunt2 = createEnemyChar(50, 15, 5);
+        defer destroyEnemyChar(grunt2);
+        const grunt3 = createEnemyChar(50, 15, 5);
+        defer destroyEnemyChar(grunt3);
 
-        for (turnOrder) |charIndex| {
-            switch (charIndex) {
-                1 => {
-                    if (sys.getPlayerHealth(@constCast(tankChar)) <= 0) {
-                        continue;
-                    }
-                    try sys.handleTankInput(tankChar, &enemyTeam, &activeBuffs);
-                },
-                2 => {
-                    if (sys.getPlayerHealth(@constCast(archerChar)) <= 0) {
-                        continue;
-                    }
-                    try sys.handleArcherInput(archerChar, &enemyTeam, &activeBuffs);
-                },
-                3 => {
-                    if (sys.getPlayerHealth(@constCast(priestChar)) <= 0) {
-                        continue;
-                    }
-                    try sys.handlePriestInput(priestChar, &playerTeam, &activeBuffs);
-                },
-                4 => {
-                    if (sys.getPlayerHealth(@constCast(grunt1)) <= 0) {
-                        continue;
-                    }
-                    const randAbility = rand.uintLessThan(usize, 2) + 1;
-                    const randChar = rand.uintLessThan(usize, 3);
-                    try sys.handleGruntTurn(grunt1, &playerTeam, &activeBuffs, randAbility, randChar);
-                    continue;
-                },
-                5 => {
-                    if (sys.getPlayerHealth(@constCast(grunt2)) <= 0) {
-                        continue;
-                    }
-                    const randAbility = rand.uintLessThan(usize, 2) + 1;
-                    const randChar = rand.uintLessThan(usize, 3);
-                    try sys.handleGruntTurn(grunt2, &playerTeam, &activeBuffs, randAbility, randChar);
-                    continue;
-                },
-                6 => {
-                    if (sys.getPlayerHealth(@constCast(grunt3)) <= 0) {
-                        continue;
-                    }
-                    const randAbility = rand.uintLessThan(usize, 2) + 1;
-                    const randChar = rand.uintLessThan(usize, 3);
-                    try sys.handleGruntTurn(grunt3, &playerTeam, &activeBuffs, randAbility, randChar);
-                    continue;
-                },
-                else => unreachable,
+        const enemyTeam = [_]?*const cpp.EnemyEntityHandle{
+            grunt1,
+            grunt2,
+            grunt3,
+        };
+
+        try sys.displayStats(&playerTeam, &enemyTeam);
+        while (true) {
+            // Randomizes turn order for all players and enemies
+            var turnOrder = [_]usize{ 1, 2, 3, 4, 5, 6 };
+            rand.shuffle(usize, &turnOrder);
+
+            for (turnOrder) |charIndex| {
+                switch (charIndex) {
+                    1 => {
+                        if (sys.getPlayerHealth(@constCast(tankChar)) <= 0) {
+                            continue;
+                        }
+                        try sys.handleTankInput(tankChar, &enemyTeam, &activeBuffs);
+                    },
+                    2 => {
+                        if (sys.getPlayerHealth(@constCast(archerChar)) <= 0) {
+                            continue;
+                        }
+                        try sys.handleArcherInput(archerChar, &enemyTeam, &activeBuffs);
+                    },
+                    3 => {
+                        if (sys.getPlayerHealth(@constCast(priestChar)) <= 0) {
+                            continue;
+                        }
+                        try sys.handlePriestInput(priestChar, &playerTeam, &activeBuffs);
+                    },
+                    4 => {
+                        if (sys.getPlayerHealth(@constCast(grunt1)) <= 0) {
+                            continue;
+                        }
+                        const randAbility = rand.uintLessThan(usize, 2) + 1;
+                        const randChar = rand.uintLessThan(usize, 3);
+                        try sys.handleGruntTurn(grunt1, &playerTeam, &activeBuffs, randAbility, randChar);
+                    },
+                    5 => {
+                        if (sys.getPlayerHealth(@constCast(grunt2)) <= 0) {
+                            continue;
+                        }
+                        const randAbility = rand.uintLessThan(usize, 2) + 1;
+                        const randChar = rand.uintLessThan(usize, 3);
+                        try sys.handleGruntTurn(grunt2, &playerTeam, &activeBuffs, randAbility, randChar);
+                    },
+                    6 => {
+                        if (sys.getPlayerHealth(@constCast(grunt3)) <= 0) {
+                            continue;
+                        }
+                        const randAbility = rand.uintLessThan(usize, 2) + 1;
+                        const randChar = rand.uintLessThan(usize, 3);
+                        try sys.handleGruntTurn(grunt3, &playerTeam, &activeBuffs, randAbility, randChar);
+                    },
+                    else => unreachable,
+                }
+            }
+            // If Player's team is dead (end game), if enemy's team is dead (end current loop), if neither (continue loop)
+            const breakLoop = try processGameState(&activeBuffs, &playerTeam, &enemyTeam);
+            if (breakLoop) {
+                break;
+            }
+        } // End First Game Loop
+    }
+    try sys.generateApplyItem(&playerTeam, &items);
+    try sys.generateApplyItem(&playerTeam, &items);
+    try sys.generateApplyItem(&playerTeam, &items);
+
+    try sys.clearActiveBuffs(&activeBuffs);
+    try sys.resetCharHealth(&playerTeam);
+
+    { // Begin Second Game Loop
+        // Enemy Cultist: 200 Health, 35 Damage, 20% Defense
+        const cultist1 = createEnemyChar(200, 35, 20);
+        defer destroyEnemyChar(cultist1);
+        const cultist2 = createEnemyChar(200, 35, 20);
+        defer destroyEnemyChar(cultist2);
+        const cultist3 = createEnemyChar(200, 35, 20);
+        defer destroyEnemyChar(cultist3);
+
+        const enemyTeam = [_]?*const cpp.EnemyEntityHandle{ cultist1, cultist2, cultist3 };
+
+        try sys.displayStats(&playerTeam, &enemyTeam);
+        while (true) {
+            // Randomizes turn order for all players and enemies
+            var turnOrder = [_]usize{ 1, 2, 3, 4, 5 };
+            rand.shuffle(usize, &turnOrder);
+
+            for (turnOrder) |charIndex| {
+                switch (charIndex) {
+                    1 => {
+                        if (sys.getPlayerHealth(@constCast(tankChar)) <= 0) {
+                            continue;
+                        }
+                        try sys.handleTankInput(tankChar, &enemyTeam, &activeBuffs);
+                    },
+                    2 => {
+                        if (sys.getPlayerHealth(@constCast(archerChar)) <= 0) {
+                            continue;
+                        }
+                        try sys.handleArcherInput(archerChar, &enemyTeam, &activeBuffs);
+                    },
+                    3 => {
+                        if (sys.getPlayerHealth(@constCast(priestChar)) <= 0) {
+                            continue;
+                        }
+                        try sys.handlePriestInput(priestChar, &playerTeam, &activeBuffs);
+                    },
+                    4 => {
+                        if (sys.getPlayerHealth(@constCast(cultist1)) <= 0) {
+                            continue;
+                        }
+                        const randAbility = rand.uintLessThan(usize, 2) + 1;
+                        const randChar = rand.uintLessThan(usize, 3);
+                        try sys.handleCultistTurn(cultist1, &playerTeam, &activeBuffs, randAbility, randChar);
+                    },
+                    5 => {
+                        if (sys.getPlayerHealth(@constCast(cultist2)) <= 0) {
+                            continue;
+                        }
+                        const randAbility = rand.uintLessThan(usize, 2) + 1;
+                        const randChar = rand.uintLessThan(usize, 3);
+                        try sys.handleCultistTurn(cultist2, &playerTeam, &activeBuffs, randAbility, randChar);
+                    },
+                    6 => {
+                        if (sys.getPlayerHealth(@constCast(cultist3)) <= 0) {
+                            continue;
+                        }
+                        const randAbility = rand.uintLessThan(usize, 2) + 1;
+                        const randChar = rand.uintLessThan(usize, 3);
+                        try sys.handleCultistTurn(cultist3, &playerTeam, &activeBuffs, randAbility, randChar);
+                    },
+                    else => unreachable,
+                }
+            }
+            // If Player's team is dead (end game), if enemy's team is dead (end current loop), if neither (continue loop)
+            const breakLoop = try processGameState(&activeBuffs, &playerTeam, &enemyTeam);
+            if (breakLoop) {
+                break;
             }
         }
-        // If Player's team is dead (end game), if enemy's team is dead (end current loop), if neither (continue loop)
-        const breakLoop = try processGameState(&activeBuffs, &playerTeam, &enemyTeam);
-        if (breakLoop) {
-            break;
-        }
-    } // End of Game Loop
+    } // End Second Game Loop
     try sys.generateApplyItem(&playerTeam, &items);
     try sys.generateApplyItem(&playerTeam, &items);
-}
+    try sys.generateApplyItem(&playerTeam, &items);
+
+    try sys.clearActiveBuffs(&activeBuffs);
+    try sys.resetCharHealth(&playerTeam);
+} // End Main Function
 
 fn processGameState(activeBuffs: *arrayList(sys.ActiveBuff), playerTeam: *const [3]?*const sys.PlayerHandle, enemyTeam: *const [3]?*const sys.EnemyHandle) !bool {
     const gameEnd = sys.checkGameEnd(enemyTeam, playerTeam);
