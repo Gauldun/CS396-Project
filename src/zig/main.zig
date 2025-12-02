@@ -186,6 +186,7 @@ pub fn main() !void {
         }
     } // End of Game Loop
     try sys.generateApplyItem(&playerTeam, &items);
+    try sys.generateApplyItem(&playerTeam, &items);
 }
 
 fn processGameState(activeBuffs: *arrayList(sys.ActiveBuff), playerTeam: *const [3]?*const sys.PlayerHandle, enemyTeam: *const [3]?*const sys.EnemyHandle) !bool {

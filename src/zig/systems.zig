@@ -584,7 +584,7 @@ pub fn generateApplyItem(playerTeam: *const [3]?*const PlayerHandle, ExistingIte
     }
 }
 
-fn updateCharWithItem(playerTeam: *const [3]?*const PlayerHandle, item: ?*const ItemHandle, COLOR: []const u8) !void {
+fn updateCharWithItem(playerTeam: *const [3]?*const PlayerHandle, item: ?*const ItemHandle, COLOR: []const u8) anyerror!void {
     const tank = playerTeam[0];
     const archer = playerTeam[1];
     const priest = playerTeam[2];
@@ -594,15 +594,15 @@ fn updateCharWithItem(playerTeam: *const [3]?*const PlayerHandle, item: ?*const 
 
         switch (charInput) {
             '1' => {
-                try equipNewItem(tank, "tank", item, COLOR);
+                try equipNewItem(playerTeam, tank, "tank", item, COLOR);
                 return;
             },
             '2' => {
-                try equipNewItem(archer, "archer", item, COLOR);
+                try equipNewItem(playerTeam, archer, "archer", item, COLOR);
                 return;
             },
             '3' => {
-                try equipNewItem(priest, "priest", item, COLOR);
+                try equipNewItem(playerTeam, priest, "priest", item, COLOR);
                 return;
             },
             '4' => {
@@ -618,7 +618,7 @@ fn updateCharWithItem(playerTeam: *const [3]?*const PlayerHandle, item: ?*const 
     }
 }
 
-fn equipNewItem(player: ?*const PlayerHandle, playerName: []const u8, item: ?*const ItemHandle, COLOR: []const u8) !void {
+fn equipNewItem(playerTeam: *const [3]?*const PlayerHandle, player: ?*const PlayerHandle, playerName: []const u8, item: ?*const ItemHandle, COLOR: []const u8) !void {
     const currPlayerDmg = getPlayerDamage(@constCast(player));
     const currPlayerHealth = getPlayerHealth(@constCast(player));
     const currPlayerDefense = getPlayerDefense(@constCast(player));
@@ -631,14 +631,14 @@ fn equipNewItem(player: ?*const PlayerHandle, playerName: []const u8, item: ?*co
         const currItemName = getItemName(@constCast(currItem));
 
         while (true) {
-            try stdout.print(COLOR_ERROR ++ "\nReminder: Each player member can only carry a single item." ++
+            try stdout.print(COLOR_ERROR ++ "\nEach player member can only carry a single item." ++
                 COLOR_HERO ++ "\nThe {s} is already carrying the " ++ COLOR_CRIT ++ "{s}" ++ COLOR_HERO ++ "." ++
                 COLOR_STRESS ++ "\nWould you like to have the {s} drop their current item? [Y/N]: " ++ ANSI_RESET, .{ playerName, currItemName, playerName });
             try stdout.flush();
             const willDrop = try getCharInput("");
             switch (willDrop) {
                 'y', 'Y' => {
-                    try stdout.print(COLOR_STRESS ++ "\nThe " ++ COLOR_CRIT ++ "{s} has been destroyed!" ++ ANSI_RESET, .{currItem});
+                    try stdout.print(COLOR_STRESS ++ "\nThe " ++ COLOR_CRIT ++ "{s} " ++ COLOR_STRESS ++ "has been destroyed!" ++ ANSI_RESET, .{currItemName});
                     try stdout.flush();
                     dropItem(@constCast(player));
 
@@ -652,7 +652,10 @@ fn equipNewItem(player: ?*const PlayerHandle, playerName: []const u8, item: ?*co
 
                     return;
                 },
-                'n', 'N' => return,
+                'n', 'N' => {
+                    try updateCharWithItem(playerTeam, item, COLOR);
+                    return;
+                },
                 else => {
                     try stdout.print(COLOR_ERROR ++ "\nInvalid Input. Try Again." ++ ANSI_RESET, .{});
                     try stdout.flush();
