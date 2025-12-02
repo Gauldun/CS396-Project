@@ -41,8 +41,9 @@ void EnemyEntity::setDamage(int newDamage) { damage = newDamage; }
 void EnemyEntity::setDefense(int newDefense) { defense = newDefense; }
 
 // Item Methods
-Item::Item(int dVal, int hVal, int defVal, int sDVal)
-    : damage{dVal}, health{hVal}, defense{defVal}, selfDamage{sDVal} {}
+Item::Item(int dVal, int hVal, int defVal, int sDVal, const char *name)
+    : damage{dVal}, health{hVal}, defense{defVal}, selfDamage{sDVal},
+      itemName{name} {}
 
 // Getters
 int Item::getDamage() { return damage; }

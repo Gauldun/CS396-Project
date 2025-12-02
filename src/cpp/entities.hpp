@@ -61,7 +61,8 @@ private:
   std::string itemName;
 
 public:
-  Item(int dVal = 0, int hVal = 0, int defVal = 0, int sDVal = 0);
+  Item(int dVal = 0, int hVal = 0, int defVal = 0, int sDVal = 0,
+       const char *name = "");
 
   // Getters
   int getDamage();

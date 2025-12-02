@@ -17,7 +17,7 @@ PlayerEntityHandle *PlayerEntityCreate(int32_t hVal, int32_t dVal,
 EnemyEntityHandle *EnemyEntityCreate(int32_t hVal, int32_t dVal,
                                      int32_t defVal);
 ItemHandle *ItemHandleCreate(int32_t dVal, int32_t hVal, int32_t defVal,
-                             int32_t sDVal);
+                             int32_t sDVal, const char *name);
 
 // Destructors
 void PlayerEntityDestroy(PlayerEntityHandle *handle);

@@ -34,49 +34,49 @@ pub fn main() !void {
 
     // Vague Rarity Items
     // Rusty Shiv: Additional 5 Damage
-    const rustyShiv = createItem(5, 0, 0, 0);
+    const rustyShiv = createItem(5, 0, 0, 0, "Rusty Shiv");
     defer destroyItem(rustyShiv);
     // Tattered Cloth: Additional 10 Health
-    const tatteredCloth = createItem(0, 10, 0, 0);
+    const tatteredCloth = createItem(0, 10, 0, 0, "Tattered Cloth");
     defer destroyItem(tatteredCloth);
     // Broken Shield: Additional 5 Health, 3% Defense
-    const brokenShield = createItem(0, 5, 3, 0);
+    const brokenShield = createItem(0, 5, 3, 0, "Broken Shield");
     defer destroyItem(brokenShield);
     // Suspicious Potion: Additional 5% Damage, 15 Health, 5 Damage to Self Every Round
-    const susPotion = createItem(5, 15, 0, 5);
+    const susPotion = createItem(5, 15, 0, 5, "Suspicious Potion");
     defer destroyItem(susPotion);
 
     // Distant Rarity Items
     // Iron Longsword: Additional 10 Damage, 3% Defense
-    const ironSword = createItem(10, 0, 3, 0);
+    const ironSword = createItem(10, 0, 3, 0, "Iron Longsword");
     defer destroyItem(ironSword);
     // Leather Armor Set: Additional 20 Health, 10% Defense
-    const leatherArmor = createItem(0, 20, 10, 0);
+    const leatherArmor = createItem(0, 20, 10, 0, "Leather Armor Set");
     defer destroyItem(leatherArmor);
     // Sturdy Buckler: Addtional 5 Damage, 15 Health, 5% Defense
-    const sturdyBuckler = createItem(5, 15, 5, 0);
+    const sturdyBuckler = createItem(5, 15, 5, 0, "Sturdy Buckler");
     defer destroyItem(sturdyBuckler);
     // Sharp Duelist's Rapier: Additional 15 Damage, 5% Defense
-    const sharpRapier = createItem(15, 0, 5, 0);
+    const sharpRapier = createItem(15, 0, 5, 0, "Sharp Rapier");
     defer destroyItem(sharpRapier);
 
     // Indelible Rarity Items
     // Runed BattleAxe: Additional 25 Damage, 25 Health, 5% Defense
-    const runedAxe = createItem(25, 25, 5, 0);
+    const runedAxe = createItem(25, 25, 5, 0, "Rune-Covered BattleAxe");
     defer destroyItem(runedAxe);
     // Guardian Platemail: Additional 50 Health, 15% Defense
-    const guardianPlate = createItem(0, 50, 15, 0);
+    const guardianPlate = createItem(0, 50, 15, 0, "Guardian Platemail");
     defer destroyItem(guardianPlate);
 
     // Unforgettable Rarity Items
-    // Holy Blade Iem: Additional 50 Damage, 20 Health, 5% Defense, 15 Damage to Self Every Round
-    const hollowedBlade = createItem(50, 20, 5, 15);
+    // Hollowed Blade: Additional 50 Damage, 20 Health, 5% Defense, 15 Damage to Self Every Round
+    const hollowedBlade = createItem(50, 20, 5, 15, "Hollowed Blade");
     defer destroyItem(hollowedBlade);
-    // Ancient Armor: Additional 10 Damage, 100 Health, 30% Defense
-    const ancientAegis = createItem(10, 100, 30, 0);
+    // Ancient Aegis of Celestials: Additional 10 Damage, 100 Health, 30% Defense
+    const ancientAegis = createItem(10, 100, 30, 0, "Ancient Aegis of Celestials");
     defer destroyItem(ancientAegis);
 
-    const items = [_]?*cpp.ItemHandle{
+    var items = [_]?*cpp.ItemHandle{
         rustyShiv,
         tatteredCloth,
         brokenShield,
@@ -109,7 +109,7 @@ pub fn main() !void {
     const grunt3 = createEnemyChar(50, 15, 5);
     defer destroyEnemyChar(grunt3);
 
-    var playerTeam = [_]?*const cpp.PlayerEntityHandle{
+    const playerTeam = [_]?*const cpp.PlayerEntityHandle{
         tankChar,
         archerChar,
         priestChar,
@@ -185,11 +185,7 @@ pub fn main() !void {
             break;
         }
     } // End of Game Loop
-    const randItem = rand.uintLessThan(usize, 10);
-    const givenItem = items[randItem];
-    sys.equipItem(@constCast(tankChar), @constCast(givenItem));
-    try stdout.print("\nGiven Item: {s}", .{sys.getItemName(@constCast(givenItem))});
-    try stdout.flush();
+    try sys.generateApplyItem(&playerTeam, &items);
 }
 
 fn processGameState(activeBuffs: *arrayList(sys.ActiveBuff), playerTeam: *const [3]?*const sys.PlayerHandle, enemyTeam: *const [3]?*const sys.EnemyHandle) !bool {

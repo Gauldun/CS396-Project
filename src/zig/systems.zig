@@ -20,6 +20,9 @@ pub const stdin = &stdinReader.interface;
 // Array declaration variable
 pub const arrayList = std.array_list.Managed;
 
+// Random Number Gen
+const rand = std.crypto.random;
+
 // Player Entity Getters
 pub const getPlayerHealth = cpp.PlayerEntityGetHealth;
 pub const getPlayerMaxHealth = cpp.PlayerEntityGetMaxHealth;
@@ -68,6 +71,7 @@ pub const setItemSelfDamage = cpp.ItemSetSelfDamage;
 // Entity Constants
 pub const PlayerHandle = cpp.PlayerEntityHandle;
 pub const EnemyHandle = cpp.EnemyEntityHandle;
+pub const ItemHandle = cpp.ItemHandle;
 
 // EntityHandle Enum For Functions Calls
 const EntityHandle = union(enum) {
@@ -552,4 +556,102 @@ pub fn checkGameEnd(enemyTeam: *const [3]?*const EnemyHandle, playerTeam: *const
         }
     }
     return if (deadEnemyMembers >= 3) 1 else if (deadPlayerMembers >= 3) 2 else 0;
+}
+
+pub fn generateApplyItem(playerTeam: *const [3]?*const PlayerHandle, ExistingItems: *const [12]?*const ItemHandle) !void {
+    while (true) {
+        const randItemIndex = rand.uintLessThan(usize, ExistingItems.len);
+        if (ExistingItems[randItemIndex] == null) {
+            continue;
+        } else {
+            const item = ExistingItems[randItemIndex];
+            const itemName = getItemName(@constCast(item));
+
+            try stdout.print("\nThe enemy party has dropped the {s}!", .{itemName});
+            try stdout.flush();
+            try updateCharWithItem(playerTeam, item);
+            ExistingItems[randItemIndex] = null;
+        }
+    }
+}
+
+fn updateCharWithItem(playerTeam: *const [3]?*const PlayerHandle, item: ?*const ItemHandle) !void {
+    const tank = playerTeam[0];
+    const archer = playerTeam[1];
+    const priest = playerTeam[2];
+
+    while (true) {
+        const charInput = try getCharInput("\nEnter which team member should have the item [1. Tank] [2. Archer] [3. Priest] [4. Nobody]: ");
+
+        switch (charInput) {
+            '1' => try equipCurrItem(tank, "tank", item),
+            '2' => try equipCurrItem(archer, "archer", item),
+            '3' => try equipCurrItem(priest, "priest", item),
+            '4' => {
+                try stdout.print("\nThe generated item has been destroyed!", .{});
+                try stdout.flush();
+            },
+            else => {
+                try stdout.print(COLOR_ERROR ++ "\nInvalid Input. Try Again." ++ ANSI_RESET, .{});
+                try stdout.flush();
+            },
+        }
+    }
+}
+
+fn equipCurrItem(player: ?*const PlayerHandle, playerName: []const u8, item: ?*const ItemHandle) !void {
+    const currPlayerDmg = getPlayerDamage(@constCast(player));
+    const currPlayerHealth = getPlayerHealth(@constCast(player));
+    const currPlayerDefense = getPlayerDefense(@constCast(player));
+    const newItemName = getItemName(@constCast(item));
+
+    const playerHandle = EntityHandle{ .player = player };
+
+    if (playerHasItem(@constCast(player))) {
+        const currItem = getPlayerItem(@constCast(player));
+        const currItemName = getItemName(@constCast(currItem));
+
+        while (true) {
+            try stdout.print("\nReminder: Each player member can only carry a single item." ++
+                "\nThe {s} is already carrying the {s}." ++
+                "\nWould you like to have the {s} drop their current item? [Y/N]: ", .{ playerName, playerName, currItemName });
+            try stdout.flush();
+            const willDrop = try getCharInput("");
+            switch (willDrop) {
+                'y', 'Y' => {
+                    dropItem(@constCast(player));
+
+                    const currItemDmg = getItemDamage(@constCast(currItem));
+                    const currItemHealth = getItemHealth(@constCast(currItem));
+                    const currItemDefense = getItemDefense(@constCast(currItem));
+
+                    try updateStat(playerHandle, currPlayerDmg, currItemDmg, subtract, setPlayerDamage);
+                    try updateStat(playerHandle, currPlayerHealth, currItemHealth, subtract, setPlayerHealth);
+                    try updateStat(playerHandle, currPlayerDefense, currItemDefense, subtract, setPlayerDefense);
+
+                    return;
+                },
+                'n', 'N' => return,
+                else => {
+                    try stdout.print(COLOR_ERROR ++ "\nInvalid Input. Try Again." ++ ANSI_RESET, .{});
+                    try stdout.flush();
+                },
+            }
+        }
+    }
+
+    equipItem(@constCast(player), @constCast(item));
+
+    const newItemDmg = getItemDamage(@constCast(item));
+    const newItemHealth = getItemHealth(@constCast(item));
+    const newItemDefense = getItemDefense(@constCast(item));
+
+    try updateStat(playerHandle, currPlayerDmg, newItemDmg, add, setPlayerDamage);
+    try updateStat(playerHandle, currPlayerHealth, newItemHealth, add, setPlayerHealth);
+    try updateStat(playerHandle, currPlayerDefense, newItemDefense, add, setPlayerDefense);
+
+    try stdout.print("\nThe {s} has equipped the {s}!", .{ playerName, newItemName });
+    try stdout.flush();
+
+    return;
 }

@@ -23,8 +23,9 @@ EnemyEntityHandle *EnemyEntityCreate(int32_t hVal, int32_t dVal,
 }
 
 ItemHandle *ItemHandleCreate(int32_t dVal, int32_t hVal, int32_t defVal,
-                             int32_t sDVal) {
-  return reinterpret_cast<ItemHandle *>(new Item(dVal, hVal, defVal, sDVal));
+                             int32_t sDVal, const char *name) {
+  return reinterpret_cast<ItemHandle *>(
+      new Item(dVal, hVal, defVal, sDVal, name));
 }
 
 // Destructors
